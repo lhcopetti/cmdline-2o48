@@ -1,6 +1,6 @@
 module LibSpec where
 
-import Lib (validateTestFramemework, reduce)
+import Lib (reduce)
 import Test.Hspec
 
 main :: IO ()
@@ -9,14 +9,7 @@ main = hspec spec
 
 spec :: Spec
 spec = do 
-    testFramework
     testReduce
-
-testFramework :: Spec
-testFramework = describe "testFramework" $
-       it "should validate that the test framework is working" $
-       validateTestFramemework 2 `shouldBe` 4
-
 
 testReduce :: Spec
 testReduce = describe "test reduce" $ do
@@ -32,9 +25,7 @@ testReduce = describe "test reduce" $ do
         reduce [2, 2, 2, 2] `shouldBe` [4, 4]
         reduce [4, 2, 2] `shouldBe` [4, 4]
 
-    it "empty spaces (equal to zero) should be removed" $ do
+    it "empty leading spaces (equal to zero) should be removed" $ do
         reduce [0, 0, 2, 2] `shouldBe` [4]
-        reduce [0, 2, 2, 0, 0] `shouldBe` [4]
-
-
-
+    it "empty trailling spaces (equal to zero) should be removed" $ do
+        reduce [2, 2, 0, 0] `shouldBe` [4]
