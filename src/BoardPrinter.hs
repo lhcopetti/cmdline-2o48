@@ -3,13 +3,18 @@ module BoardPrinter
     , topValue
     , format
     , printBoard
+    , boardToString
     ) where
 
 import Board2048
 import Data.List (intercalate)
 
-printBoard :: Board2048 -> [String]
-printBoard board = [horizontalLines] ++
+
+printBoard :: Board2048 -> IO ()
+printBoard = mapM_ putStrLn . boardToString
+
+boardToString :: Board2048 -> [String]
+boardToString board = [horizontalLines] ++
                    printRow (row 0)  ++
                    [horizontalLines] ++
                    printRow (row 1)  ++

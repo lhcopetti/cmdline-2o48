@@ -17,6 +17,7 @@ spec = do
     testViewBoard
     testNewFromArray
     testNewRandomBoard
+    testReduces
 
 testNewBoard :: Spec
 testNewBoard = describe "test new board" $ do
@@ -48,3 +49,23 @@ testNewFromArray = describe "test from array" $ do
     it "should invalidate boards with size different than 4" $ do
         let arr = [ [2, 2, 2, 2], [2, 2], [2, 2], [2, 2, 2, 2] ]
         fromArray arr `shouldBe` Nothing
+
+
+testReduces :: Spec
+testReduces = describe "test reduces" $ do
+        it "should push all tiles to the left" $ do
+            let arr = [ [0, 0, 0, 2], [0, 0, 0, 2], [0, 0, 0, 2], [0, 0, 0, 2] ]
+                arr' = [ [2, 0, 0, 0], [2, 0, 0, 0], [2, 0, 0, 0], [2, 0, 0, 0] ]
+            reduceLeft <$> (fromArray arr) `shouldBe` fromArray arr'
+        it "should push all the tiles to the right" $ do
+            let arr = [ [2, 0, 0, 0], [2, 0, 0, 0], [2, 0, 0, 0], [2, 0, 0, 0] ]
+                arr' = [ [0, 0, 0, 2], [0, 0, 0, 2], [0, 0, 0, 2], [0, 0, 0, 2] ]
+            reduceRight <$> (fromArray arr) `shouldBe` fromArray arr'
+        it "should push all the tiles upwards" $ do
+            let arr = [ [2, 0, 0, 0], [0, 2, 0, 0], [0, 0, 2, 0], [0, 0, 0, 2] ]
+                arr' = [ [2, 2, 2, 2], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0] ]
+            reduceUp <$> (fromArray arr) `shouldBe` fromArray arr'
+        it "should push all the tiles downwards" $ do
+            let arr = [ [2, 0, 0, 0], [0, 2, 0, 0], [0, 0, 2, 0], [0, 0, 0, 2] ]
+                arr' = [ [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [2, 2, 2, 2] ]
+            reduceDown <$> (fromArray arr) `shouldBe` fromArray arr'

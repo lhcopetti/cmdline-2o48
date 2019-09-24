@@ -6,12 +6,20 @@ module Board2048 (
     score,
     fromArray,
     newRandomBoard,
-    getRow
+    getRow,
+
+    reduceLeft,
+    reduceRight,
+    reduceUp,
+    reduceDown,
+
+    cols
     ) where
 
 import Control.Monad.State
 import Data.Maybe (fromJust)
 import System.Random
+import Lib (reduce)
 
 data Board2048 = Board2048 [[Int]]
     deriving (Show, Eq)
@@ -61,6 +69,21 @@ stRandomR (lo, hi) = do
     put s'
     return x
 
-
 getRow :: Board2048 -> Int -> [Int]
 getRow (Board2048 b) row = b !! row
+
+reduceLeft :: Board2048 -> Board2048
+reduceLeft (Board2048 b) = Board2048 (map reduce b)
+
+reduceRight :: Board2048 -> Board2048
+reduceRight (Board2048 b) = Board2048 (map (reverse . reduce . reverse) b)
+
+reduceUp :: Board2048 -> Board2048
+reduceUp (Board2048 b) = Board2048 . cols . map reduce . cols $ b
+
+reduceDown :: Board2048 -> Board2048
+reduceDown (Board2048 b) = Board2048 . cols . map (reverse . reduce . reverse) . cols $ b
+
+cols :: [[Int]] -> [[Int]]
+cols [] = []
+cols xss = map head xss : cols (filter (not . null) . map tail $ xss)

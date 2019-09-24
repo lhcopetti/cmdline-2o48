@@ -1,21 +1,20 @@
 module Lib
-    ( someFunc
+    ( collapse
     , reduce
     ) where
 
-
-
-
-someFunc :: IO ()
-someFunc = putStrLn "someFunc"
-
-
 reduce :: [Int] -> [Int]
-reduce = reduce' . filter (/= 0) 
+reduce xs = let oldSize = length xs
+                newXs = collapse xs
+                newSize = length newXs
+            in  newXs ++ (replicate (oldSize - newSize) 0)
 
-reduce' :: [Int] -> [Int]
-reduce' [] = []
-reduce' [x] = [x]
-reduce' (x:x':xs)
-    | x == x' = x * x' : reduce xs
-    | otherwise = x : reduce (x':xs)
+collapse :: [Int] -> [Int]
+collapse = collapse' . filter (/= 0) 
+
+collapse' :: [Int] -> [Int]
+collapse' [] = []
+collapse' [x] = [x]
+collapse' (x:x':xs)
+    | x == x' = x * x' : collapse' xs
+    | otherwise = x : collapse' (x':xs)
