@@ -137,7 +137,12 @@ replaceAt xss (x, y) n = take x xss ++ [replaceValue row y n] ++ rest
 data Direction = DUp | DLeft | DRight | DDown
 
 step :: Board2048 -> Direction -> State StdGen Board2048
-step board dir = addTileToBoard (stepDir board dir)
+step board dir = do
+    let stepped = stepDir board dir
+    if stepped /= board then
+        addTileToBoard (stepDir board dir)
+    else
+        return stepped
 
 stepDir :: Board2048 -> Direction -> Board2048
 stepDir b DUp = reduceUp b
