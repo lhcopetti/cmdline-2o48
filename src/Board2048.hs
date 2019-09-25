@@ -1,7 +1,6 @@
 module Board2048 (
     Board2048,
     newBoard,
-    isEmpty,
     view,
     score,
     fromArray,
@@ -40,9 +39,6 @@ defaultSize = 4
 
 newBoard :: Board2048
 newBoard = Board2048 (replicate defaultSize (replicate defaultSize 0))
-
-isEmpty :: Board2048 -> Bool
-isEmpty (Board2048 b) = all (== 0) . concat $ b
 
 view :: Board2048 -> [[Int]]
 view (Board2048 b) = b

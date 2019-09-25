@@ -13,7 +13,6 @@ main = hspec spec
 
 spec :: Spec
 spec = do
-    testNewBoard
     testViewBoard
     testNewFromArray
     testNewRandomBoard
@@ -24,11 +23,6 @@ spec = do
     testMultipleReduces
     testStepping
     testAddTileToBoard
-
-testNewBoard :: Spec
-testNewBoard = describe "test new board" $ do
-    it "newBoard should set up an empty board" $
-        isEmpty newBoard `shouldBe` True
 
 testViewBoard :: Spec
 testViewBoard = describe "test view board" $
