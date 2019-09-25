@@ -19,7 +19,9 @@ module Board2048 (
     replaceAt,
 
     step,
-    Direction (..)
+    Direction (..),
+
+    addTileToBoard
 
 
     ) where
@@ -104,14 +106,17 @@ cols xss = map head xss : cols (filter (not . null) . map tail $ xss)
 addTileToBoard :: Board2048 -> State StdGen Board2048
 addTileToBoard (Board2048 b) = do
     let coord = zip [0..] (concat b)
-        onlyZeros = filter ((/= 0) . snd) coord
-    randomIdx <- getRandomFromPool onlyZeros
-    newRandomTile <- getNewRandomTile
-    let newB = replaceAt b (makeCoord randomIdx) newRandomTile
-    return (Board2048 newB)
+        onlyZeros = filter ((== 0) . snd) coord
+    if null onlyZeros then
+        return (Board2048 b)
+    else do
+        randomIdx <- getRandomFromPool onlyZeros
+        newRandomTile <- getNewRandomTile
+        let newB = replaceAt b (makeCoord randomIdx) newRandomTile
+        return (Board2048 newB)
 
 makeCoord :: Int -> (Int, Int)
-makeCoord idx = (idx `mod` defaultSize, idx `div` defaultSize)
+makeCoord idx = (idx `div` defaultSize, idx `mod` defaultSize)
 
 type Coord = Int
 getRandomFromPool :: [(Coord, Int)] -> State StdGen Coord
@@ -140,7 +145,7 @@ step :: Board2048 -> Direction -> State StdGen Board2048
 step board dir = do
     let stepped = stepDir board dir
     if stepped /= board then
-        addTileToBoard (stepDir board dir)
+        addTileToBoard stepped
     else
         return stepped
 

@@ -20,6 +20,8 @@ spec = do
     testReduces
     testReplaceAt
     testMultipleReduces
+    testStepping
+    testAddTileToBoard
 
 testNewBoard :: Spec
 testNewBoard = describe "test new board" $ do
@@ -80,6 +82,68 @@ testMultipleReduces = describe "test multiple reduces" $ do
     it "should send the tile in the clockwise direction" $ do
         (reduceUp . reduceLeft . reduceDown . reduceRight) <$> (fromArray arr) `shouldBe` fromArray arr
 
+    it "should sum the two tiles together" $ do
+        reduceRight <$> (fromArray [ [8, 8, 0, 0]
+                                   , [0, 0, 0, 0]
+                                   , [0, 0, 0, 0]
+                                   , [0, 0, 0, 0]]) `shouldBe` fromArray [ [0, 0, 0, 16]
+                                                                        , [0, 0, 0, 0]
+                                                                        , [0, 0, 0, 0]
+                                                                        , [0, 0, 0, 0]]
+
+    it "should sum the four tiles together" $ do
+        (reduceRight . reduceRight) <$> (fromArray [ [8, 8, 8, 8]
+                                                   , [0, 0, 0, 0]
+                                                   , [0, 0, 0, 0]
+                                                   , [0, 0, 0, 0]]) `shouldBe` fromArray [ [0, 0, 0, 32]
+                                                                                         , [0, 0, 0, 0]
+                                                                                         , [0, 0, 0, 0]
+                                                                                         , [0, 0, 0, 0]]
+    it "should send the tile clockwise direction" $ do
+        (reduceRight . reduceDown) <$> (fromArray [ [8, 0, 0, 0]
+                                                   , [0, 0, 0, 8]
+                                                   , [0, 0, 0, 0]
+                                                   , [0, 0, 0, 0]]) `shouldBe` fromArray [ [0, 0, 0, 0]
+                                                                                         , [0, 0, 0, 0]
+                                                                                         , [0, 0, 0, 0]
+                                                                                         , [0, 0, 0, 16]]
+    it "should send the tile clockwise direction" $ do
+        (reduceRight . reduceDown) <$> (fromArray [ [8, 0, 0, 0]
+                                                   , [0, 0, 0, 8]
+                                                   , [0, 0, 0, 0]
+                                                   , [0, 0, 0, 0]]) `shouldBe` fromArray [ [0, 0, 0, 0]
+                                                                                         , [0, 0, 0, 0]
+                                                                                         , [0, 0, 0, 0]
+                                                                                         , [0, 0, 0, 16]]
+
+    it "should be able to reduce all tiles to only one in the bottom-right corner" $ do
+        (reduceDown . reduceDown . reduceRight . reduceRight) <$> (fromArray [ [8, 0, 0, 0]
+                                                                             , [0, 0, 0, 8]
+                                                                             , [4, 0, 0, 4]
+                                                                             , [4, 0, 0, 4]]) `shouldBe` fromArray [ [0, 0, 0, 0]
+                                                                                                                     , [0, 0, 0, 0]
+                                                                                                                     , [0, 0, 0, 0]
+                                                                                                                     , [0, 0, 0, 32]]
+
+    it "should be able to reduce all tiles to only one in the top-left corner" $ do
+        (reduceUp . reduceUp . reduceLeft . reduceLeft) <$> (fromArray [ [16, 0, 0, 0]
+                                                                       , [0, 0, 0, 16]
+                                                                       , [8, 0, 0, 8]
+                                                                       , [8, 0, 0, 8]]) `shouldBe` fromArray [ [64, 0, 0, 0]
+                                                                                                             , [0, 0, 0, 0]
+                                                                                                             , [0, 0, 0, 0]
+                                                                                                             , [0, 0, 0, 0]]
+    let arr2 = [[8, 0, 0, 0]
+              , [0, 0, 0, 8]
+              , [4, 0, 0, 4]
+              , [4, 0, 0, 4]]
+    let res2 = [[32, 0, 0, 0]
+              , [0, 0, 0, 0]
+              , [0, 0, 0, 0]
+              , [0, 0, 0, 0]]
+    it "should send the tile in the clockwise direction" $ do
+        (reduceUp . reduceLeft . reduceDown . reduceDown . reduceRight) <$> (fromArray arr2) `shouldBe` fromArray res2
+
 
 testReplaceAt :: Spec
 testReplaceAt = describe "test replaceAt" $ do
@@ -92,3 +156,66 @@ testReplaceAt = describe "test replaceAt" $ do
     it "should replace the last element of the last row" $ do
         let arr = [ [1, 2, 3], [4, 5, 6], [7, 8, 9] ]
         replaceAt arr (2, 2) 42 `shouldBe` [ [1, 2, 3], [4, 5, 6], [7, 8, 42] ]
+
+
+testStepping :: Spec
+testStepping = describe "test stepping" $ do
+    it "stepping the elements upwards" $ do
+        let arr1 = [[8, 0, 0, 0]
+                  , [0, 0, 0, 8]
+                  , [4, 0, 0, 4]
+                  , [4, 0, 0, 4]]
+            res1 = [[8, 0, 0, 8]
+                  , [8, 0, 4, 8]
+                  , [0, 0, 0, 0]
+                  , [0, 0, 0, 0]]
+            gen = pure (mkStdGen 42)
+        evalState <$> (step <$> (fromArray arr1) <*> pure DUp) <*> gen `shouldBe` fromArray res1
+    
+    it "stepping the elements and adding a new tile on the same row should not be a problem" $ do
+        let arr = [[0, 0, 0, 0]
+                  ,[0, 0, 0, 0]
+                  ,[0, 0, 0, 0]
+                  ,[0, 0, 4, 4]]
+            res = [[0, 0, 0, 0]
+                  ,[0, 0, 0, 0]
+                  ,[0, 0, 0, 0]
+                  ,[0, 0, 4, 8]]
+            gen = pure (mkStdGen 40)
+        evalState <$> (step <$> (fromArray arr) <*> pure DRight) <*> gen `shouldBe` fromArray res
+
+    it "stepping the elements and adding a new tile on the same column should not be a problem" $ do
+        let arr = [[0, 0, 0, 0]
+                  ,[0, 2, 0, 0]
+                  ,[0, 0, 0, 0]
+                  ,[0, 0, 0, 4]]
+            
+            res = [[0, 0, 0, 0]
+                  ,[0, 0, 0, 0]
+                  ,[0, 0, 0, 0]
+                  ,[0, 2, 0, 4]]
+            gen = pure (mkStdGen 42)
+        evalState <$> (step <$> (fromArray arr) <*> pure DDown) <*> gen `shouldBe` fromArray res
+
+
+testAddTileToBoard :: Spec
+testAddTileToBoard = describe "test add tile to bard" $ do
+    it "adding tile to the board" $ do
+        let arr = [[0, 0, 0, 0]
+                  ,[0, 0, 0, 0]
+                  ,[0, 0, 0, 0]
+                  ,[0, 0, 0, 8]]
+            res = [[0, 0, 0, 0]
+                  ,[0, 0, 0, 0]
+                  ,[0, 0, 0, 4]
+                  ,[0, 0, 0, 8]]
+            gen = pure (mkStdGen 42)
+        evalState <$> (addTileToBoard <$> fromArray arr) <*> gen `shouldBe` fromArray res
+
+    it "adding tile to a full board should be a noop" $ do
+        let arr = [[2, 4, 2, 4]
+                  ,[2, 4, 2, 4]
+                  ,[2, 4, 2, 4]
+                  ,[2, 4, 2, 4]]
+            gen = pure (mkStdGen 42)
+        evalState <$> (addTileToBoard <$> fromArray arr) <*> gen `shouldBe` fromArray arr
