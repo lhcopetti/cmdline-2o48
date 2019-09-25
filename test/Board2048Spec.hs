@@ -18,6 +18,7 @@ spec = do
     testNewFromArray
     testNewRandomBoard
     testReduces
+    testReplaceAt
 
 testNewBoard :: Spec
 testNewBoard = describe "test new board" $ do
@@ -69,3 +70,16 @@ testReduces = describe "test reduces" $ do
             let arr = [ [2, 0, 0, 0], [0, 2, 0, 0], [0, 0, 2, 0], [0, 0, 0, 2] ]
                 arr' = [ [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [2, 2, 2, 2] ]
             reduceDown <$> (fromArray arr) `shouldBe` fromArray arr'
+
+
+testReplaceAt :: Spec
+testReplaceAt = describe "test replaceAt" $ do
+    it "should replace first element of the first row" $ do
+        let arr = [ [1, 2], [3, 4] ]
+        replaceAt arr (0, 0) 10 `shouldBe` [ [10, 2], [3, 4] ]
+    it "should replace the middle element of the middle row" $ do
+        let arr = [ [1, 2, 3], [4, 5, 6], [7, 8, 9] ]
+        replaceAt arr (1, 1) 19 `shouldBe` [ [1, 2, 3], [4, 19, 6], [7, 8, 9] ]
+    it "should replace the last element of the last row" $ do
+        let arr = [ [1, 2, 3], [4, 5, 6], [7, 8, 9] ]
+        replaceAt arr (2, 2) 42 `shouldBe` [ [1, 2, 3], [4, 5, 6], [7, 8, 42] ]

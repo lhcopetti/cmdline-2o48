@@ -16,5 +16,5 @@ collapse' :: [Int] -> [Int]
 collapse' [] = []
 collapse' [x] = [x]
 collapse' (x:x':xs)
-    | x == x' = x * x' : collapse' xs
+    | x == x' = x + x' : collapse' xs
     | otherwise = x : collapse' (x':xs)

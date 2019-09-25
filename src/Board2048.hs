@@ -13,10 +13,19 @@ module Board2048 (
     reduceUp,
     reduceDown,
 
-    cols
+    cols,
+    rows,
+
+    replaceAt,
+
+    step,
+    Direction (..)
+
+
     ) where
 
 import Control.Monad.State
+import Control.Monad (liftM)
 import Data.Maybe (fromJust)
 import System.Random
 import Lib (reduce)
@@ -84,6 +93,54 @@ reduceUp (Board2048 b) = Board2048 . cols . map reduce . cols $ b
 reduceDown :: Board2048 -> Board2048
 reduceDown (Board2048 b) = Board2048 . cols . map (reverse . reduce . reverse) . cols $ b
 
+rows :: [[Int]] -> [[Int]]
+rows = id
+
 cols :: [[Int]] -> [[Int]]
 cols [] = []
 cols xss = map head xss : cols (filter (not . null) . map tail $ xss)
+
+
+addTileToBoard :: Board2048 -> State StdGen Board2048
+addTileToBoard (Board2048 b) = do
+    let coord = zip [0..] (concat b)
+        onlyZeros = filter ((/= 0) . snd) coord
+    randomIdx <- getRandomFromPool onlyZeros
+    newRandomTile <- getNewRandomTile
+    let newB = replaceAt b (makeCoord randomIdx) newRandomTile
+    return (Board2048 newB)
+
+makeCoord :: Int -> (Int, Int)
+makeCoord idx = (idx `mod` defaultSize, idx `div` defaultSize)
+
+type Coord = Int
+getRandomFromPool :: [(Coord, Int)] -> State StdGen Coord
+getRandomFromPool xs = do
+    rndIndex <- stRandomR (0, length xs - 1)
+    return . fst . (!! rndIndex) $ xs
+
+
+getNewRandomTile :: State StdGen Int
+getNewRandomTile = liftM (*2) (stRandomR (1, 2))
+
+replaceValue :: [Int] -> Coord -> Int -> [Int]
+replaceValue xs x n = take x xs ++ [n] ++ rest
+    where
+        rest = drop (x+1) xs
+
+replaceAt :: [[Int]] -> (Int, Int) -> Int -> [[Int]]
+replaceAt xss (x, y) n = take x xss ++ [replaceValue row y n] ++ rest
+    where
+        row = xss !! x
+        rest = drop (x+1) xss
+
+data Direction = DUp | DLeft | DRight | DDown
+
+step :: Board2048 -> Direction -> State StdGen Board2048
+step board dir = addTileToBoard (stepDir board dir)
+
+stepDir :: Board2048 -> Direction -> Board2048
+stepDir b DUp = reduceUp b
+stepDir b DDown = reduceDown b
+stepDir b DLeft = reduceLeft b
+stepDir b DRight = reduceRight b

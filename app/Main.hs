@@ -16,23 +16,26 @@ main = do
     hSetBuffering stdin NoBuffering
     hSetBuffering stdout NoBuffering
     stdGen <- newStdGen
-    loop (evalState newRandomBoard stdGen)
+    let (board, stdGen') = runState newRandomBoard stdGen
+    loop board stdGen'
     putStrLn "The end! I hope you are happy."
 
-loop :: Board2048 -> IO ()
-loop board = do
+loop :: Board2048 -> StdGen -> IO ()
+loop board stdGen = do
     clearScreen
     printBoard board
     ch <- hGetChar stdin
-    when (ch /= '\ESC') (loop (update board ch))
+    when (ch /= '\ESC') $ do
+        let (b', s') = runState (update board ch) stdGen
+        loop b' s'
 
 
-update :: Board2048 -> Char -> Board2048
-update b 'w' = reduceUp    b
-update b 'a' = reduceLeft  b
-update b 's' = reduceDown  b
-update b 'd' = reduceRight b
-update b _ = b
+update :: Board2048 -> Char -> State StdGen Board2048
+update b 'w' = step b DUp
+update b 'a' = step b DLeft
+update b 's' = step b DDown
+update b 'd' = step b DRight
+update b _ = return b
 
 clearScreen :: IO ()
 clearScreen = callCommand "clear"
