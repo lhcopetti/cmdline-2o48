@@ -46,7 +46,6 @@ topValue :: Int -> Int
 topValue xs = xs `div` 100
 
 format :: Int -> String
---format n = show (n `div` 10) ++ show (n `mod` 10)
 format n
     | n == 0 = "  "
     | n < 10 = " " ++ show n

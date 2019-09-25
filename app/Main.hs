@@ -3,7 +3,6 @@ module Main where
 import Control.Monad (when)
 import Control.Monad.State
 import Data.Char
-import Lib
 import System.IO
 import System.Process
 import System.Random

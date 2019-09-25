@@ -21,16 +21,16 @@ module Board2048 (
     step,
     Direction (..),
 
-    addTileToBoard
+    addTileToBoard,
 
-
+    reduce,
+    collapse
     ) where
 
 import Control.Monad.State
 import Control.Monad (liftM)
 import Data.Maybe (fromJust)
 import System.Random
-import Lib (reduce)
 
 data Board2048 = Board2048 [[Int]]
     deriving (Show, Eq)
@@ -154,3 +154,20 @@ stepDir b DUp = reduceUp b
 stepDir b DDown = reduceDown b
 stepDir b DLeft = reduceLeft b
 stepDir b DRight = reduceRight b
+
+
+reduce :: [Int] -> [Int]
+reduce xs = let oldSize = length xs
+                newXs = collapse xs
+                newSize = length newXs
+            in  newXs ++ (replicate (oldSize - newSize) 0)
+
+collapse :: [Int] -> [Int]
+collapse = collapse' . filter (/= 0) 
+
+collapse' :: [Int] -> [Int]
+collapse' [] = []
+collapse' [x] = [x]
+collapse' (x:x':xs)
+    | x == x' = x + x' : collapse' xs
+    | otherwise = x : collapse' (x':xs)

@@ -17,6 +17,8 @@ spec = do
     testViewBoard
     testNewFromArray
     testNewRandomBoard
+    testReduce
+    testCollapse
     testReduces
     testReplaceAt
     testMultipleReduces
@@ -166,8 +168,8 @@ testStepping = describe "test stepping" $ do
                   , [4, 0, 0, 4]
                   , [4, 0, 0, 4]]
             res1 = [[8, 0, 0, 8]
-                  , [8, 0, 4, 8]
-                  , [0, 0, 0, 0]
+                  , [8, 0, 0, 8]
+                  , [0, 4, 0, 0]
                   , [0, 0, 0, 0]]
             gen = pure (mkStdGen 42)
         evalState <$> (step <$> (fromArray arr1) <*> pure DUp) <*> gen `shouldBe` fromArray res1
@@ -179,8 +181,8 @@ testStepping = describe "test stepping" $ do
                   ,[0, 0, 4, 4]]
             res = [[0, 0, 0, 0]
                   ,[0, 0, 0, 0]
-                  ,[0, 0, 0, 0]
-                  ,[0, 0, 4, 8]]
+                  ,[0, 0, 0, 4]
+                  ,[0, 0, 0, 8]]
             gen = pure (mkStdGen 40)
         evalState <$> (step <$> (fromArray arr) <*> pure DRight) <*> gen `shouldBe` fromArray res
 
@@ -191,7 +193,7 @@ testStepping = describe "test stepping" $ do
                   ,[0, 0, 0, 4]]
             
             res = [[0, 0, 0, 0]
-                  ,[0, 0, 0, 0]
+                  ,[0, 0, 0, 4]
                   ,[0, 0, 0, 0]
                   ,[0, 2, 0, 4]]
             gen = pure (mkStdGen 42)
@@ -199,7 +201,7 @@ testStepping = describe "test stepping" $ do
 
 
 testAddTileToBoard :: Spec
-testAddTileToBoard = describe "test add tile to bard" $ do
+testAddTileToBoard = describe "test add tile to the board" $ do
     it "adding tile to the board" $ do
         let arr = [[0, 0, 0, 0]
                   ,[0, 0, 0, 0]
@@ -207,8 +209,8 @@ testAddTileToBoard = describe "test add tile to bard" $ do
                   ,[0, 0, 0, 8]]
             res = [[0, 0, 0, 0]
                   ,[0, 0, 0, 0]
-                  ,[0, 0, 0, 4]
-                  ,[0, 0, 0, 8]]
+                  ,[0, 0, 0, 0]
+                  ,[0, 0, 4, 8]]
             gen = pure (mkStdGen 42)
         evalState <$> (addTileToBoard <$> fromArray arr) <*> gen `shouldBe` fromArray res
 
@@ -219,3 +221,31 @@ testAddTileToBoard = describe "test add tile to bard" $ do
                   ,[2, 4, 2, 4]]
             gen = pure (mkStdGen 42)
         evalState <$> (addTileToBoard <$> fromArray arr) <*> gen `shouldBe` fromArray arr
+
+
+testCollapse :: Spec
+testCollapse = describe "test collapse" $ do
+    it "should return the empty list" $
+        collapse [] `shouldBe` []
+    it "should return the same element" $
+        collapse [2] `shouldBe` [2]
+    it "should not collapse the elements if they are different" $
+        collapse [2, 4] `shouldBe` [2, 4]
+    it "should collapse elements when they are equal" $
+        collapse [2, 2] `shouldBe` [4]
+    it "should collapse elements only once for each pass" $ do
+        collapse [2, 2, 2, 2] `shouldBe` [4, 4]
+        collapse [4, 2, 2] `shouldBe` [4, 4]
+
+    it "empty leading spaces (equal to zero) should be removed" $ do
+        collapse [0, 0, 2, 2] `shouldBe` [4]
+    it "empty trailling spaces (equal to zero) should be removed" $ do
+        collapse [2, 2, 0, 0] `shouldBe` [4]
+
+testReduce :: Spec
+testReduce = describe "test reduce" $ do
+    it "should not change the array size" $ do
+        reduce [0, 0, 0, 0, 0, 0] `shouldBe` [0, 0, 0, 0, 0, 0]
+    it "when collapsing elements, should restore the array size" $ do
+        reduce [2, 2, 2, 2] `shouldBe` [4, 4, 0, 0]
+        reduce [0, 0, 2, 2] `shouldBe` [4, 0, 0, 0]
