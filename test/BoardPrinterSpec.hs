@@ -22,9 +22,9 @@ testBottomValue = describe "test value separation" $ do
         topValue 2048 `shouldBe` 20
         topValue 5 `shouldBe` 0
         topValue 123 `shouldBe` 1
-    it "the digit to string should always contain zero padding to the left" $ do
-        format 0 `shouldBe` "00"
+    it "the digit to string should be blank when dealing with zeros on the left" $ do
+        format 0 `shouldBe` "  "
         format 20 `shouldBe` "20"
         format 48 `shouldBe` "48"
         format 51 `shouldBe` "51"
-        format 2 `shouldBe` "02"
+        format 2 `shouldBe` " 2"

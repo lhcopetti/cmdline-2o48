@@ -19,6 +19,7 @@ spec = do
     testNewRandomBoard
     testReduces
     testReplaceAt
+    testMultipleReduces
 
 testNewBoard :: Spec
 testNewBoard = describe "test new board" $ do
@@ -36,7 +37,6 @@ testNewRandomBoard = describe "test new random board" $ do
         let stdGen = mkStdGen 42
             randomBoards = evalState (replicateM 500 newRandomBoard) stdGen
         all ((== 2) . score) randomBoards `shouldBe` True
-        --score newRandomBoard `shouldBe` 2
 
 
 testNewFromArray :: Spec
@@ -70,6 +70,15 @@ testReduces = describe "test reduces" $ do
             let arr = [ [2, 0, 0, 0], [0, 2, 0, 0], [0, 0, 2, 0], [0, 0, 0, 2] ]
                 arr' = [ [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [2, 2, 2, 2] ]
             reduceDown <$> (fromArray arr) `shouldBe` fromArray arr'
+
+testMultipleReduces :: Spec
+testMultipleReduces = describe "test multiple reduces" $ do
+    let arr = [ [8, 0, 0, 0]
+              , [0, 0, 0, 0]
+              , [0, 0, 0, 0]
+              , [0, 0, 0, 0]]
+    it "should send the tile in the clockwise direction" $ do
+        (reduceUp . reduceLeft . reduceDown . reduceRight) <$> (fromArray arr) `shouldBe` fromArray arr
 
 
 testReplaceAt :: Spec
