@@ -27,7 +27,7 @@ spec = do
 testViewBoard :: Spec
 testViewBoard = describe "test view board" $
     it "should return the 2d array that the board is comprised of" $
-        view newBoard `shouldBe` [[0, 0, 0, 0],[0, 0, 0, 0],[0, 0, 0, 0],[0, 0, 0, 0]]
+        view newEmptyBoard `shouldBe` [[0, 0, 0, 0],[0, 0, 0, 0],[0, 0, 0, 0],[0, 0, 0, 0]]
 
 testNewRandomBoard :: Spec
 testNewRandomBoard = describe "test new random board" $ do
@@ -165,8 +165,8 @@ testStepping = describe "test stepping" $ do
                   , [8, 0, 0, 8]
                   , [0, 4, 0, 0]
                   , [0, 0, 0, 0]]
-            gen = pure (mkStdGen 42)
-        evalState <$> (step <$> (fromArray arr1) <*> pure DUp) <*> gen `shouldBe` fromArray res1
+            gen = mkStdGen 42
+        board <$> (step <$> (fromArrayG arr1 gen) <*> pure DUp) `shouldBe` fromArray res1
     
     it "stepping the elements and adding a new tile on the same row should not be a problem" $ do
         let arr = [[0, 0, 0, 0]
@@ -177,8 +177,8 @@ testStepping = describe "test stepping" $ do
                   ,[0, 0, 0, 0]
                   ,[0, 0, 0, 4]
                   ,[0, 0, 0, 8]]
-            gen = pure (mkStdGen 40)
-        evalState <$> (step <$> (fromArray arr) <*> pure DRight) <*> gen `shouldBe` fromArray res
+            gen = mkStdGen 40
+        board <$> (step <$> (fromArrayG arr gen) <*> pure DRight) `shouldBe` fromArray res
 
     it "stepping the elements and adding a new tile on the same column should not be a problem" $ do
         let arr = [[0, 0, 0, 0]
@@ -190,8 +190,8 @@ testStepping = describe "test stepping" $ do
                   ,[0, 0, 0, 4]
                   ,[0, 0, 0, 0]
                   ,[0, 2, 0, 4]]
-            gen = pure (mkStdGen 42)
-        evalState <$> (step <$> (fromArray arr) <*> pure DDown) <*> gen `shouldBe` fromArray res
+            gen = mkStdGen 42
+        board <$> (step <$> (fromArrayG arr gen) <*> pure DDown) `shouldBe` fromArray res
 
 
 testAddTileToBoard :: Spec

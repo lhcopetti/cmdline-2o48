@@ -14,27 +14,23 @@ main :: IO ()
 main = do
     hSetBuffering stdin NoBuffering
     hSetBuffering stdout NoBuffering
-    stdGen <- newStdGen
-    let (board, stdGen') = runState newRandomBoard stdGen
-    loop board stdGen'
+    loop =<< new2048GameIO
     putStrLn "The end! I hope you are happy."
 
-loop :: Board2048 -> StdGen -> IO ()
-loop board stdGen = do
+loop :: Game2048 -> IO ()
+loop game = do
     clearScreen
-    printBoard board
+    printBoard (board game)
     ch <- hGetChar stdin
-    when (ch /= '\ESC') $ do
-        let (b', s') = runState (update board ch) stdGen
-        loop b' s'
+    when (ch /= '\ESC') $ loop (update game ch)
 
 
-update :: Board2048 -> Char -> State StdGen Board2048
-update b 'w' = step b DUp
-update b 'a' = step b DLeft
-update b 's' = step b DDown
-update b 'd' = step b DRight
-update b _ = return b
+update :: Game2048 -> Char -> Game2048
+update g 'w' = step g DUp
+update g 'a' = step g DLeft
+update g 's' = step g DDown
+update g 'd' = step g DRight
+update g _ = g
 
 clearScreen :: IO ()
 clearScreen = callCommand "clear"
