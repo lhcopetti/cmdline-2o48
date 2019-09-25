@@ -2,15 +2,11 @@ module Board2048 (
 
     newEmptyBoard,
     newRandomBoard,
-    new2048GameIO,
 
     Board2048,
-    Game2048,
-    board,
     view,
     score,
     fromArray,
-    fromArrayG,
 
     getRow,
 
@@ -23,9 +19,6 @@ module Board2048 (
     rows,
 
     replaceAt,
-
-    step,
-    Direction (..),
 
     addTileToBoard,
 
@@ -41,22 +34,8 @@ import System.Random
 data Board2048 = Board2048 [[Int]]
     deriving (Show, Eq)
 
-data Game2048 = Game2048 Board2048 StdGen
-
 defaultSize :: Int
 defaultSize = 4
-
-board :: Game2048 -> Board2048
-board (Game2048 b _) = b
-
-new2048GameIO :: IO Game2048
-new2048GameIO = return . new2048Game =<< newStdGen
-
-new2048Game :: StdGen -> Game2048
-new2048Game gen = do
-    let board = newEmptyBoard
-        (b', gen') = runState (addTileToBoard board) gen
-     in Game2048 b' gen'
 
 newEmptyBoard :: Board2048
 newEmptyBoard = Board2048 (replicate defaultSize (replicate defaultSize 0))
@@ -67,11 +46,6 @@ view (Board2048 b) = b
 
 score :: Board2048 -> Int
 score (Board2048 b) = sum . concat $ b
-
-fromArrayG :: [[Int]] -> StdGen -> Maybe Game2048
-fromArrayG xs gen = do
-    b <- fromArray xs
-    return (Game2048 b gen)
 
 
 fromArray :: [[Int]] -> Maybe Board2048
@@ -162,22 +136,6 @@ replaceAt xss (x, y) n = take x xss ++ [replaceValue row y n] ++ rest
     where
         row = xss !! x
         rest = drop (x+1) xss
-
-data Direction = DUp | DLeft | DRight | DDown
-
-step :: Game2048 -> Direction -> Game2048
-step (Game2048 board gen) dir = do
-    let stepped = stepDir board dir
-    if stepped == board then Game2048 board gen
-    else let (b', gen') = runState (addTileToBoard stepped) gen
-         in Game2048 b' gen'
-
-
-stepDir :: Board2048 -> Direction -> Board2048
-stepDir b DUp = reduceUp b
-stepDir b DDown = reduceDown b
-stepDir b DLeft = reduceLeft b
-stepDir b DRight = reduceRight b
 
 
 reduce :: [Int] -> [Int]

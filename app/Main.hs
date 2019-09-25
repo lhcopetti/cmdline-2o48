@@ -7,7 +7,7 @@ import System.IO
 import System.Process
 import System.Random
 
-import Board2048
+import Game2048
 import BoardPrinter
 
 main :: IO ()

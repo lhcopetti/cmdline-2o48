@@ -1,6 +1,7 @@
 module Board2048Spec where
 
 import Board2048
+import Game2048
 import Control.Monad
 import Control.Monad.IO.Class
 import Control.Monad.State
