@@ -109,15 +109,15 @@ addTileToBoard (Board2048 b) = do
     let coord = zip [0..] (concat b)
         onlyZeros = filter ((== 0) . snd) coord
 
-    output $ "There are " ++ show (length onlyZeros) ++ " slot candidates for the new tile"
+    info $ "There are " ++ show (length onlyZeros) ++ " slot candidates for the new tile"
 
     if null onlyZeros then do
-        output "the grid is full, no slot available to fill"
+        warn "the grid is full, no slot available to fill"
         return (Board2048 b)
     else do
         randomCoord <- makeCoord <$> (getRandomFromPool onlyZeros)
         newRandomTile <- getNewRandomTile
-        output $ "Filling coord: " ++ show randomCoord ++ " with value " ++ show newRandomTile
+        debug $ "Filling coord: " ++ show randomCoord ++ " with value " ++ show newRandomTile
         let newB = replaceAt b randomCoord newRandomTile
         return (Board2048 newB)
 

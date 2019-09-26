@@ -38,19 +38,26 @@ step game dir = runM2048 game (step' game dir)
 
 step' :: Game2048 -> Direction -> M2048 Game2048
 step' (Game2048 board gen dc lr) dir = do
-    output $ "Stepping board to direction: " ++ show dir
+    logSeparator
+    info $ "Stepping board to direction: " ++ show dir
     let stepped = stepDir board dir
         boardChanged = stepped /= board
 
-    let emptySlots = emptySlotsCount board
-    when (emptySlots <= 3) (output $ "Careful, you currently only have " ++ show emptySlots ++ " empty slots available")
-
-
     if not boardChanged then do
-        output $ "Board did not change, ignoring input"
+        debug $ "Board did not change, ignoring input"
         return (Game2048 board gen dc lr)
     else do
         withNewTile <- addTileToBoard stepped
+
+        let emptySlots = emptySlotsCount withNewTile
+        when (emptySlots > 0 && emptySlots <= 3) $
+            warn $ "Careful, you currently only have " ++ show emptySlots ++ " empty slots available"
+        when (emptySlots == 0) $
+            warn "You have run OUT OF SPACE. Careful not to lose the game"
+
+
+
+
         gen' <- get
         let newDC = incCountFor dir dc
          in return (Game2048 withNewTile gen' newDC lr)
