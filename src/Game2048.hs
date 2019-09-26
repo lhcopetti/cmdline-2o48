@@ -1,6 +1,6 @@
+{-# LANGUAGE RecordWildCards #-}
 module Game2048
-    ( Game2048
-    , new2048GameIO 
+    ( new2048GameIO 
     , new2048Game
     , board
     , count
@@ -10,39 +10,50 @@ module Game2048
 
 import Board2048
 import Control.Monad.State
+import Control.Monad.Writer
 import Directions
+import LogRecord
 import System.Random
+import Types2048
 import DirectionCounter
-
-data Game2048 = Game2048 
-    { board :: Board2048
-    , gen   :: StdGen
-    , count :: DirectionCounter
-    }
 
 new2048GameIO :: IO Game2048
 new2048GameIO = return . new2048Game =<< newStdGen
 
 new2048Game :: StdGen -> Game2048
-new2048Game gen = 
-    let board = newEmptyBoard
-        (b', gen') = runState (addTileToBoard board) gen
-     in Game2048 b' gen' emptyDC
+new2048Game gen = runM2048Gen gen (addTileToBoard newEmptyBoard >>= constructEmpty2048)
+
+constructEmpty2048 :: Board2048 -> M2048 Game2048
+constructEmpty2048 board = do
+    gen <- get
+    return (Game2048 board gen emptyDC emptyLogRecord)
 
 fromArrayG :: [[Int]] -> StdGen -> Maybe Game2048
 fromArrayG xs gen = do
     b <- fromArray xs
-    return (Game2048 b gen emptyDC)
+    return (Game2048 b gen emptyDC emptyLogRecord)
 
 step :: Game2048 -> Direction -> Game2048
-step (Game2048 board gen dc) dir = do
+step game dir = runM2048 game (step' game dir)
+
+step' :: Game2048 -> Direction -> M2048 Game2048
+step' (Game2048 board gen dc lr) dir = do
+    output $ "Stepping board to direction: " ++ show dir
     let stepped = stepDir board dir
         boardChanged = stepped /= board
-    if not boardChanged then Game2048 board gen dc
-    else 
-        let (b', gen') = runState (addTileToBoard stepped) gen
-            newDC = incCountFor dir dc
-         in Game2048 b' gen' newDC
+
+    let emptySlots = emptySlotsCount board
+    when (emptySlots <= 3) (output $ "Careful, you currently only have " ++ show emptySlots ++ " empty slots available")
+
+
+    if not boardChanged then do
+        output $ "Board did not change, ignoring input"
+        return (Game2048 board gen dc lr)
+    else do
+        withNewTile <- addTileToBoard stepped
+        gen' <- get
+        let newDC = incCountFor dir dc
+         in return (Game2048 withNewTile gen' newDC lr)
 
 stepDir :: Board2048 -> Direction -> Board2048
 stepDir b DUp = reduceUp b

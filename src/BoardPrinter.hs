@@ -8,6 +8,7 @@ module BoardPrinter
 
 import Board2048
 import Game2048
+import Types2048
 import DirectionCounter
 import Directions
 import Data.List (intercalate)

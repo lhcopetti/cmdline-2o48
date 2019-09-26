@@ -23,23 +23,27 @@ module Board2048 (
     addTileToBoard,
 
     reduce,
-    collapse
+    collapse,
+
+    emptySlotsCount
     ) where
 
 import Control.Monad.State
+import Control.Monad.Writer
 import Control.Monad (liftM)
 import Data.Maybe (fromJust)
+import LogRecord
 import System.Random
-
-data Board2048 = Board2048 [[Int]]
-    deriving (Show, Eq)
+import Types2048
 
 defaultSize :: Int
 defaultSize = 4
 
 newEmptyBoard :: Board2048
 newEmptyBoard = Board2048 (replicate defaultSize (replicate defaultSize 0))
-        
+
+emptySlotsCount :: Board2048 -> Int
+emptySlotsCount = length . filter (==0) . concat . view
 
 view :: Board2048 -> [[Int]]
 view (Board2048 b) = b
@@ -55,7 +59,7 @@ fromArray xs = do
     guard (all ((== defaultSize) . length) xs)
     return (Board2048 xs)
 
-newRandomBoard :: State StdGen Board2048
+newRandomBoard :: WriterT LogRecord (State StdGen) Board2048
 newRandomBoard = do
     count <- stRandomR (0, 15)
     let left = replicate count 0
@@ -71,7 +75,7 @@ chunksOf n xs
     | otherwise = (take n xs) : (chunksOf n (drop n xs))
 
 
-stRandomR :: (Int, Int) -> State StdGen Int
+stRandomR :: (Int, Int) -> WriterT LogRecord (State StdGen) Int
 stRandomR (lo, hi) = do
     s <- get
     let (x, s') = randomR (lo, hi) s
@@ -100,30 +104,34 @@ cols :: [[Int]] -> [[Int]]
 cols [] = []
 cols xss = map head xss : cols (filter (not . null) . map tail $ xss)
 
-
-addTileToBoard :: Board2048 -> State StdGen Board2048
+addTileToBoard :: Board2048 -> M2048 Board2048
 addTileToBoard (Board2048 b) = do
     let coord = zip [0..] (concat b)
         onlyZeros = filter ((== 0) . snd) coord
-    if null onlyZeros then
+
+    output $ "There are " ++ show (length onlyZeros) ++ " slot candidates for the new tile"
+
+    if null onlyZeros then do
+        output "the grid is full, no slot available to fill"
         return (Board2048 b)
     else do
-        randomIdx <- getRandomFromPool onlyZeros
+        randomCoord <- makeCoord <$> (getRandomFromPool onlyZeros)
         newRandomTile <- getNewRandomTile
-        let newB = replaceAt b (makeCoord randomIdx) newRandomTile
+        output $ "Filling coord: " ++ show randomCoord ++ " with value " ++ show newRandomTile
+        let newB = replaceAt b randomCoord newRandomTile
         return (Board2048 newB)
 
 makeCoord :: Int -> (Int, Int)
 makeCoord idx = (idx `div` defaultSize, idx `mod` defaultSize)
 
 type Coord = Int
-getRandomFromPool :: [(Coord, Int)] -> State StdGen Coord
+getRandomFromPool :: [(Coord, Int)] -> WriterT LogRecord (State StdGen) Coord
 getRandomFromPool xs = do
     rndIndex <- stRandomR (0, length xs - 1)
     return . fst . (!! rndIndex) $ xs
 
 
-getNewRandomTile :: State StdGen Int
+getNewRandomTile :: WriterT LogRecord (State StdGen) Int
 getNewRandomTile = liftM (*2) (stRandomR (1, 2))
 
 replaceValue :: [Int] -> Coord -> Int -> [Int]

@@ -2,28 +2,35 @@ module Main where
 
 import Control.Monad (when)
 import Control.Monad.State
+import Control.Monad.Writer
 import Data.Char
 import System.IO
 import System.Process
 import System.Random
 
-import Game2048
-import Directions
 import BoardPrinter
+import Directions
+import Game2048
+import Types2048
+
 
 main :: IO ()
 main = do
     hSetBuffering stdin NoBuffering
     hSetBuffering stdout NoBuffering
-    loop =<< new2048GameIO
+    game <- loop =<< new2048GameIO
     putStrLn "The end! I hope you are happy."
+    mapM_ putStrLn (logR game)
 
-loop :: Game2048 -> IO ()
+loop :: Game2048 -> IO Game2048
 loop game = do
     clearScreen
     printGame game
     ch <- hGetChar stdin
-    when (ch /= '\ESC') $ loop (update game ch)
+    if (ch /= '\ESC') then loop (update game ch)
+    else return game
+
+    
 
 
 update :: Game2048 -> Char -> Game2048
