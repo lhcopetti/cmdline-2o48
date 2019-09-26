@@ -24,6 +24,7 @@ dependencies:
 - random
 - mtl
 - process
+- containers
 
 library:
   source-dirs: src

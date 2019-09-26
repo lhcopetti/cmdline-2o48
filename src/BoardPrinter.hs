@@ -2,19 +2,42 @@ module BoardPrinter
     ( bottomValue
     , topValue
     , format
+    , printGame
     , printBoard
-    , boardToString
     ) where
 
 import Board2048
+import Game2048
+import DirectionCounter
+import Directions
 import Data.List (intercalate)
 
+printGame :: Game2048 -> IO ()
+printGame game = mapM_ putStrLn output
+    where
+        b = board game
+        output =   printBoard b
+                ++ printDC (count game)
+                ++ printScore b
 
-printBoard :: Board2048 -> IO ()
-printBoard = mapM_ putStrLn . boardToString
+printDC :: DirectionCounter -> [String]
+printDC dc = [ "T: " ++ total ++ " | "
+                        ++ up ++ "↑  " 
+                        ++ left ++ "←  " 
+                        ++ right ++ "→  " 
+                        ++ down ++ "↓ " ]
+    where
+        total = show (totalCount dc)
+        left = show (countFor DLeft dc)
+        right = show (countFor DRight dc)
+        up = show (countFor DUp dc)
+        down = show (countFor DDown dc)
 
-boardToString :: Board2048 -> [String]
-boardToString board = 
+printScore :: Board2048 -> [String]
+printScore b = ["Score: " ++ show (score b)]
+
+printBoard :: Board2048 -> [String]
+printBoard board = 
                    [horizontalLines] ++
                    printRow (row 0)  ++
                    [horizontalLines] ++
@@ -23,8 +46,7 @@ boardToString board =
                    printRow (row 2)  ++
                    [horizontalLines] ++
                    printRow (row 3)  ++
-                   [horizontalLines] ++
-                   printScore board
+                   [horizontalLines]
                    where
                         row = getRow board
 
@@ -35,9 +57,6 @@ printRow xs = ["|" ++ printTopRow xs ++ "|"] ++
         printTopRow    = intercalate "|" . map (formatS . topValue)
         printBottomRow = intercalate "|" . map (formatS . bottomValue)
         formatS x = " " ++ format x ++ " "
-
-printScore :: Board2048 -> [String]
-printScore b = ["Score: " ++ show (score b)]
 
 bottomValue :: Int -> Int
 bottomValue xs = xs `mod` 100

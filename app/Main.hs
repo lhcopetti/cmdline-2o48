@@ -8,6 +8,7 @@ import System.Process
 import System.Random
 
 import Game2048
+import Directions
 import BoardPrinter
 
 main :: IO ()
@@ -20,7 +21,7 @@ main = do
 loop :: Game2048 -> IO ()
 loop game = do
     clearScreen
-    printBoard (board game)
+    printGame game
     ch <- hGetChar stdin
     when (ch /= '\ESC') $ loop (update game ch)
 
