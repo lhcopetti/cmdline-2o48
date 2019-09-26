@@ -20,25 +20,23 @@ main = do
     hSetBuffering stdout NoBuffering
     game <- loop =<< new2048GameIO
     putStrLn "The end! I hope you are happy."
-    mapM_ putStrLn (logR game)
 
 loop :: Game2048 -> IO Game2048
 loop game = do
     clearScreen
     printGame game
     ch <- hGetChar stdin
-    if (ch /= '\ESC') then loop (update game ch)
+    if (ch /= '\ESC') then update game ch >>= loop
     else return game
 
     
-
-
-update :: Game2048 -> Char -> Game2048
-update g 'w' = step g DUp
-update g 'a' = step g DLeft
-update g 's' = step g DDown
-update g 'd' = step g DRight
-update g _ = g
+update :: Game2048 -> Char -> IO Game2048
+update g 'w' = return $ step g DUp
+update g 'a' = return $ step g DLeft
+update g 's' = return $ step g DDown
+update g 'd' = return $ step g DRight
+update g ' ' = new2048GameIO
+update g _ = return g
 
 clearScreen :: IO ()
 clearScreen = callCommand "clear"

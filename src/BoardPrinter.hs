@@ -20,6 +20,8 @@ printGame game = mapM_ putStrLn output
         output =   printBoardAndLog game
                 ++ printDC (count game)
                 ++ printScore b
+                ++ [""] ++ [""]
+                ++ printControls
 
 printDC :: DirectionCounter -> [String]
 printDC dc = [ "T: " ++ total ++ " | "
@@ -85,6 +87,11 @@ printRow xs = ["|" ++ printTopRow xs ++ "|"] ++
         printTopRow    = intercalate "|" . map (formatS . topValue)
         printBottomRow = intercalate "|" . map (formatS . bottomValue)
         formatS x = " " ++ format x ++ " "
+
+printControls :: [String]
+printControls = [ "At any time, press <ESC> or any of the <arrow keys> to exit"
+                , "Press <SPACE> to reset"
+                ]
 
 bottomValue :: Int -> Int
 bottomValue xs = xs `mod` 100
