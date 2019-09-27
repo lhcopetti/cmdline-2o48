@@ -32,10 +32,10 @@ loop game = do
 
     
 update :: Game2048 -> Char -> IO Game2048
-update g 'w' = return $ step g DUp
-update g 'a' = return $ step g DLeft
-update g 's' = return $ step g DDown
-update g 'd' = return $ step g DRight
+update g 'w' = step g DUp
+update g 'a' = step g DLeft
+update g 's' = step g DDown
+update g 'd' = step g DRight
 update g 'q' = newAlmostWinningBoard
 update g ' ' = new2048GameIO
 update g _ = return g

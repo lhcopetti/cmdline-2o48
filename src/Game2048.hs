@@ -23,9 +23,9 @@ winningTileValue :: Int
 winningTileValue = 2048
 
 new2048GameIO :: IO Game2048
-new2048GameIO = return . new2048Game =<< newStdGen
+new2048GameIO = new2048Game =<< newStdGen
 
-new2048Game :: StdGen -> Game2048
+new2048Game :: StdGen -> IO Game2048
 new2048Game gen = runM2048Gen gen (addTileToBoard newEmptyBoard >>= constructEmpty2048)
 
 constructEmpty2048 :: Board2048 -> M2048 Game2048
@@ -38,7 +38,7 @@ fromArrayG xs gen = do
     b <- fromArray xs
     return (Game2048 b gen emptyDC emptyLogRecord)
 
-step :: Game2048 -> Direction -> Game2048
+step :: Game2048 -> Direction -> IO Game2048
 step game dir = runM2048 game (step' game dir)
 
 step' :: Game2048 -> Direction -> M2048 Game2048

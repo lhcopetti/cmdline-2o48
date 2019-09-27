@@ -63,7 +63,7 @@ fromArray xs = do
     guard (all ((== defaultSize) . length) xs)
     return (Board2048 xs)
 
-newRandomBoard :: WriterT LogRecord (State StdGen) Board2048
+newRandomBoard :: M2048 Board2048
 newRandomBoard = do
     count <- stRandomR (0, 15)
     let left = replicate count 0
@@ -79,7 +79,7 @@ chunksOf n xs
     | otherwise = (take n xs) : (chunksOf n (drop n xs))
 
 
-stRandomR :: (Int, Int) -> WriterT LogRecord (State StdGen) Int
+stRandomR :: (Int, Int) -> M2048 Int
 stRandomR (lo, hi) = do
     s <- get
     let (x, s') = randomR (lo, hi) s
@@ -129,13 +129,13 @@ makeCoord :: Int -> (Int, Int)
 makeCoord idx = (idx `div` defaultSize, idx `mod` defaultSize)
 
 type Coord = Int
-getRandomFromPool :: [(Coord, Int)] -> WriterT LogRecord (State StdGen) Coord
+getRandomFromPool :: [(Coord, Int)] -> M2048 Coord
 getRandomFromPool xs = do
     rndIndex <- stRandomR (0, length xs - 1)
     return . fst . (!! rndIndex) $ xs
 
 
-getNewRandomTile :: WriterT LogRecord (State StdGen) Int
+getNewRandomTile :: M2048 Int
 getNewRandomTile = liftM (*2) (stRandomR (1, 2))
 
 replaceValue :: [Int] -> Coord -> Int -> [Int]

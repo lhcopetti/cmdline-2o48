@@ -1,0 +1,23 @@
+</haskell/cmdline-2o48/
+▾ [✗]app/
+    [✚]Main.hs
+▾ [✗]src/
+    [✹]Board2048.hs
+    BoardPrinter.hs
+    [✭]Custom2048Boards.hs
+    DirectionCounter.hs
+    Directions.hs
+    [✹]Game2048.hs
+    [✹]LogRecord.hs
+    [✹]Types2048.hs
+▸ test/
+  ChangeLog.md
+  cmdline-2o48.cabal
+  LICENSE
+  [✹]package.yaml
+  README.md
+  Setup.hs
+  simple-view.scratchpad
+  [✹]stack.yaml
+  [✹]stack.yaml.lock
+  [✭]todolist.txt
