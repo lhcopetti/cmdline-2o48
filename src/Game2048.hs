@@ -12,6 +12,7 @@ module Game2048
 import Board2048
 import Control.Monad.State
 import Control.Monad.Writer
+import Control.Monad.Trans.Either
 import Directions
 import LogRecord
 import System.Random
@@ -38,10 +39,10 @@ fromArrayG xs gen = do
     b <- fromArray xs
     return (Game2048 b gen emptyDC emptyLogRecord)
 
-step :: Game2048 -> Direction -> IO Game2048
-step game dir = runM2048 game (step' game dir)
+step :: Game2048 -> Direction -> IO (Either GameEnded Game2048)
+step game dir = erunM2048 game (step' game dir)
 
-step' :: Game2048 -> Direction -> M2048 Game2048
+step' :: Game2048 -> Direction -> EM2048 Game2048
 step' (Game2048 board gen dc lr) dir = do
     logSeparator
     info $ "Stepping board to direction: " ++ show dir
@@ -52,11 +53,16 @@ step' (Game2048 board gen dc lr) dir = do
         debug $ "Board did not change, ignoring input"
         return (Game2048 board gen dc lr)
     else do
-        when (highestTileValue stepped == winningTileValue) $
-            info $ "You have reached the unbelievable " ++ show winningTileValue ++ " score. Congratulations!"
 
+        when (gameIsWon stepped) $ do
+            info $ "You have reached the unbelievable " ++ show winningTileValue ++ " score. Congratulations!"
+            left (YouWon (Game2048 stepped gen dc lr))
 
         withNewTile <- addTileToBoard stepped
+
+        when (gameIsLost withNewTile) $ do
+            info $ "I am sorry to inform you that you have just lost the game"
+            left (YouLose (Game2048 withNewTile gen dc lr))
 
         let emptySlots = emptySlotsCount withNewTile
         when (emptySlots > 0 && emptySlots <= 3) $
@@ -65,11 +71,17 @@ step' (Game2048 board gen dc lr) dir = do
             warn "You have run OUT OF SPACE. Careful not to lose the game"
 
 
-
-
         gen' <- get
         let newDC = incCountFor dir dc
          in return (Game2048 withNewTile gen' newDC lr)
+
+gameIsWon :: Board2048 -> Bool
+gameIsWon b = highestTileValue b == winningTileValue
+
+gameIsLost :: Board2048 -> Bool
+gameIsLost b = all (== b) validMoves
+    where
+        validMoves = [reduceLeft, reduceRight, reduceUp, reduceDown] <*> pure b
 
 stepDir :: Board2048 -> Direction -> Board2048
 stepDir b DUp = reduceUp b

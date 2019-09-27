@@ -1,6 +1,11 @@
+>AHaskellGame <l/AHaskellGame/
+>DinoRush </Haskell/dino-rush/
+>home /home/lhcopetti/
+>Learning <pboxBEPiD/Learning/
+
 </haskell/cmdline-2o48/
 ▾ [✗]app/
-    [✚]Main.hs
+    [✹]Main.hs
 ▾ [✗]src/
     [✹]Board2048.hs
     BoardPrinter.hs
@@ -14,6 +19,7 @@
   ChangeLog.md
   cmdline-2o48.cabal
   LICENSE
+  NERD_tree_1
   [✹]package.yaml
   README.md
   Setup.hs

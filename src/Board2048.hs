@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleContexts #-}
 module Board2048 (
 
     newEmptyBoard,
@@ -29,10 +30,12 @@ module Board2048 (
     highestTileValue
     ) where
 
+import Control.Monad.Reader
 import Control.Monad.State
 import Control.Monad.Writer
 import Control.Monad (liftM)
 import Data.Maybe (fromJust)
+import Data.Time.Clock (UTCTime)
 import LogRecord
 import System.Random
 import Types2048
@@ -79,7 +82,7 @@ chunksOf n xs
     | otherwise = (take n xs) : (chunksOf n (drop n xs))
 
 
-stRandomR :: (Int, Int) -> M2048 Int
+stRandomR :: MonadState StdGen m => (Int, Int) -> m Int
 stRandomR (lo, hi) = do
     s <- get
     let (x, s') = randomR (lo, hi) s
@@ -108,7 +111,10 @@ cols :: [[Int]] -> [[Int]]
 cols [] = []
 cols xss = map head xss : cols (filter (not . null) . map tail $ xss)
 
-addTileToBoard :: Board2048 -> M2048 Board2048
+addTileToBoard :: ( MonadState StdGen m
+                  , MonadWriter LogRecord m
+                  , MonadReader UTCTime m
+                  ) => Board2048 -> m Board2048
 addTileToBoard (Board2048 b) = do
     let coord = zip [0..] (concat b)
         onlyZeros = filter ((== 0) . snd) coord
@@ -129,13 +135,13 @@ makeCoord :: Int -> (Int, Int)
 makeCoord idx = (idx `div` defaultSize, idx `mod` defaultSize)
 
 type Coord = Int
-getRandomFromPool :: [(Coord, Int)] -> M2048 Coord
+getRandomFromPool :: MonadState StdGen m => [(Coord, Int)] -> m Coord
 getRandomFromPool xs = do
     rndIndex <- stRandomR (0, length xs - 1)
     return . fst . (!! rndIndex) $ xs
 
 
-getNewRandomTile :: M2048 Int
+getNewRandomTile :: MonadState StdGen m => m Int
 getNewRandomTile = liftM (*2) (stRandomR (1, 2))
 
 replaceValue :: [Int] -> Coord -> Int -> [Int]

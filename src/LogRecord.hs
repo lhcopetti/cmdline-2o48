@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleContexts #-}
 module LogRecord
     ( emptyLogRecord
     , warn
@@ -10,36 +11,36 @@ module LogRecord
 import Control.Monad
 import Control.Monad.Writer
 import Control.Monad.Reader
+import Data.Time.Clock
 import Data.Time.Format
 
 import Types2048
 
-
 emptyLogRecord :: LogRecord
 emptyLogRecord = []
 
-warn :: String -> M2048 ()
+warn :: (MonadReader UTCTime m, MonadWriter LogRecord m) => String -> m ()
 warn xs = mkLogMessage "WARN" xs >>= output
 
-info :: String -> M2048 ()
+info :: (MonadReader UTCTime m, MonadWriter LogRecord m) => String -> m ()
 info xs = mkLogMessage "INFO" xs >>= output
 
-dbug :: String -> M2048 ()
+dbug :: (MonadReader UTCTime m, MonadWriter LogRecord m) => String -> m ()
 dbug xs = mkLogMessage "DBUG" xs >>= output
 
-output :: String -> M2048 ()
+output :: (MonadReader UTCTime m, MonadWriter LogRecord m) => String -> m ()
 output x = tell [x]
 
-debug :: String -> M2048 ()
+debug :: (MonadReader UTCTime m, MonadWriter LogRecord m) => String -> m ()
 debug = dbug
 
-mkLogMessage :: String -> String -> M2048 String
+mkLogMessage :: (MonadReader UTCTime m, MonadWriter LogRecord m) => String -> String -> m String
 mkLogMessage lvl msg = do
     time <- formatTimestamp
     return (lvl ++ "|" ++ time ++ "|" ++ msg)
 
-formatTimestamp :: M2048 String
+formatTimestamp :: (MonadReader UTCTime m, MonadWriter LogRecord m) => m String
 formatTimestamp = liftM (formatTime defaultTimeLocale "%T") ask
 
-logSeparator :: M2048 ()
+logSeparator :: (MonadReader UTCTime m, MonadWriter LogRecord m) => m ()
 logSeparator = output ""
