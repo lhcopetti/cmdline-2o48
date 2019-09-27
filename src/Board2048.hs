@@ -25,7 +25,8 @@ module Board2048 (
     reduce,
     collapse,
 
-    emptySlotsCount
+    emptySlotsCount,
+    highestTileValue
     ) where
 
 import Control.Monad.State
@@ -44,6 +45,9 @@ newEmptyBoard = Board2048 (replicate defaultSize (replicate defaultSize 0))
 
 emptySlotsCount :: Board2048 -> Int
 emptySlotsCount = length . filter (==0) . concat . view
+
+highestTileValue :: Board2048 -> Int
+highestTileValue = maximum . concat . view
 
 view :: Board2048 -> [[Int]]
 view (Board2048 b) = b

@@ -12,6 +12,7 @@ import BoardPrinter
 import Directions
 import Game2048
 import Types2048
+import Custom2048Boards
 
 
 main :: IO ()
@@ -35,6 +36,7 @@ update g 'w' = return $ step g DUp
 update g 'a' = return $ step g DLeft
 update g 's' = return $ step g DDown
 update g 'd' = return $ step g DRight
+update g 'q' = newAlmostWinningBoard
 update g ' ' = new2048GameIO
 update g _ = return g
 

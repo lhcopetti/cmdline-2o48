@@ -6,6 +6,7 @@ module Game2048
     , count
     , fromArrayG
     , step
+    , winningTileValue
     ) where
 
 import Board2048
@@ -16,6 +17,10 @@ import LogRecord
 import System.Random
 import Types2048
 import DirectionCounter
+
+
+winningTileValue :: Int
+winningTileValue = 2048
 
 new2048GameIO :: IO Game2048
 new2048GameIO = return . new2048Game =<< newStdGen
@@ -47,6 +52,10 @@ step' (Game2048 board gen dc lr) dir = do
         debug $ "Board did not change, ignoring input"
         return (Game2048 board gen dc lr)
     else do
+        when (highestTileValue stepped == winningTileValue) $
+            info $ "You have reached the unbelievable " ++ show winningTileValue ++ " score. Congratulations!"
+
+
         withNewTile <- addTileToBoard stepped
 
         let emptySlots = emptySlotsCount withNewTile
