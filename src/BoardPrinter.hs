@@ -21,7 +21,7 @@ printGame game = mapM_ putStrLn output
                 ++ printDC (count game)
                 ++ printScore b
                 ++ [""] ++ [""]
-                ++ printControls
+                ++ printControls game
 
 printDC :: DirectionCounter -> [String]
 printDC dc = [ "T: " ++ total ++ " | "
@@ -88,10 +88,21 @@ printRow xs = ["|" ++ printTopRow xs ++ "|"] ++
         printBottomRow = intercalate "|" . map (formatS . bottomValue)
         formatS x = " " ++ format x ++ " "
 
-printControls :: [String]
-printControls = [ "At any time, press <ESC> or any of the <arrow keys> to exit"
+printControls :: Game2048 -> [String]
+printControls g = [ "At any time, press <ESC> or any of the <arrow keys> to exit"
                 , "Press <SPACE> to reset"
-                ]
+                ] ++ printDevelopmentOptions g
+
+printDevelopmentOptions :: Game2048 -> [String]
+printDevelopmentOptions g = if devel g then printDevelOptions else printDevelHelp
+    where
+        printDevelHelp =  [ "Press <x> to enable development options" ]
+    
+        printDevelOptions = [ "Press <q> to use a board that is really close to winning"
+                            , "Press <e> to use a board that is really close to losing"
+                            , "To use a custom board, press <c> then type 16 comma-separated values"
+                            ]
+
 
 bottomValue :: Int -> Int
 bottomValue xs = xs `mod` 100

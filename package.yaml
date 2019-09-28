@@ -25,6 +25,8 @@ dependencies:
 - mtl
 - process
 - containers
+- time
+- transformers-either
 
 library:
   source-dirs: src

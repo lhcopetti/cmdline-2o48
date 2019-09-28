@@ -30,6 +30,7 @@ data Game2048 = Game2048
     , gen   :: StdGen
     , count :: DirectionCounter
     , logR   :: [String]
+    , devel :: Bool
     }
 
 data GameEnded  = YouWon Game2048

@@ -7,6 +7,9 @@ module Game2048
     , fromArrayG
     , step
     , winningTileValue
+    , enableDevelopmentMode
+    , disableDevelopmentMode
+    , toggleDevelopmentMode
     ) where
 
 import Board2048
@@ -32,18 +35,18 @@ new2048Game gen = runM2048Gen gen (addTileToBoard newEmptyBoard >>= constructEmp
 constructEmpty2048 :: Board2048 -> M2048 Game2048
 constructEmpty2048 board = do
     gen <- get
-    return (Game2048 board gen emptyDC emptyLogRecord)
+    return (Game2048 board gen emptyDC emptyLogRecord False)
 
 fromArrayG :: [[Int]] -> StdGen -> Maybe Game2048
 fromArrayG xs gen = do
     b <- fromArray xs
-    return (Game2048 b gen emptyDC emptyLogRecord)
+    return (Game2048 b gen emptyDC emptyLogRecord False)
 
 step :: Game2048 -> Direction -> IO (Either GameEnded Game2048)
 step game dir = erunM2048 game (step' game dir)
 
 step' :: Game2048 -> Direction -> EM2048 Game2048
-step' (Game2048 board gen dc lr) dir = do
+step' Game2048 {..} dir = do
     logSeparator
     info $ "Stepping board to direction: " ++ show dir
     let stepped = stepDir board dir
@@ -51,18 +54,18 @@ step' (Game2048 board gen dc lr) dir = do
 
     if not boardChanged then do
         debug $ "Board did not change, ignoring input"
-        return (Game2048 board gen dc lr)
+        return (Game2048 board gen count logR devel)
     else do
 
         when (gameIsWon stepped) $ do
             info $ "You have reached the unbelievable " ++ show winningTileValue ++ " score. Congratulations!"
-            left (YouWon (Game2048 stepped gen dc lr))
+            left (YouWon (Game2048 stepped gen count logR devel))
 
         withNewTile <- addTileToBoard stepped
 
         when (gameIsLost withNewTile) $ do
             info $ "I am sorry to inform you that you have just lost the game"
-            left (YouLose (Game2048 withNewTile gen dc lr))
+            left (YouLose (Game2048 withNewTile gen count logR devel))
 
         let emptySlots = emptySlotsCount withNewTile
         when (emptySlots > 0 && emptySlots <= 3) $
@@ -72,8 +75,8 @@ step' (Game2048 board gen dc lr) dir = do
 
 
         gen' <- get
-        let newDC = incCountFor dir dc
-         in return (Game2048 withNewTile gen' newDC lr)
+        let newDC = incCountFor dir count
+         in return (Game2048 withNewTile gen' newDC logR devel)
 
 gameIsWon :: Board2048 -> Bool
 gameIsWon b = highestTileValue b == winningTileValue
@@ -89,3 +92,11 @@ stepDir b DDown = reduceDown b
 stepDir b DLeft = reduceLeft b
 stepDir b DRight = reduceRight b
 
+enableDevelopmentMode :: Game2048 -> Game2048
+enableDevelopmentMode g = g { devel = True }
+
+disableDevelopmentMode :: Game2048 -> Game2048
+disableDevelopmentMode g = g { devel = False }
+
+toggleDevelopmentMode :: Game2048 -> Game2048
+toggleDevelopmentMode g = g { devel = not (devel g) }

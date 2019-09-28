@@ -47,6 +47,7 @@ update g 's' = step g DDown
 update g 'd' = step g DRight
 update g 'q' = liftM Right newAlmostWinningBoard
 update g 'e' = liftM Right newAlmostLostBoard
+update g 'x' = return . Right . toggleDevelopmentMode $ g
 update g ' ' = liftM Right new2048GameIO
 update g _ = return (Right g)
 
