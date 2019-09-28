@@ -45,10 +45,10 @@ update g 'w' = step g DUp
 update g 'a' = step g DLeft
 update g 's' = step g DDown
 update g 'd' = step g DRight
-update g 'q' = liftM Right newAlmostWinningBoard
-update g 'e' = liftM Right newAlmostLostBoard
+update g 'q' = liftM Right (devNewAlmostWinningGame g)
+update g 'e' = liftM Right (devNewAlmostLosingGame g)
 update g 'x' = return . Right . toggleDevelopmentMode $ g
-update g ' ' = liftM Right new2048GameIO
+update g ' ' = liftM Right (devReset2048Game g)
 update g _ = return (Right g)
 
 handleGameEnded :: GameEnded -> IO ()

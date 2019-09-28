@@ -2,20 +2,25 @@
 module Game2048
     ( new2048GameIO 
     , new2048Game
-    , board
-    , count
+    , devReset2048Game
+    , gameScore
     , fromArrayG
     , step
     , winningTileValue
     , enableDevelopmentMode
     , disableDevelopmentMode
     , toggleDevelopmentMode
+
+    , devNewAlmostWinningGame
+    , devNewAlmostLosingGame
     ) where
 
 import Board2048
 import Control.Monad.State
 import Control.Monad.Writer
 import Control.Monad.Trans.Either
+import Custom2048Boards
+import Data.Maybe
 import Directions
 import LogRecord
 import System.Random
@@ -30,12 +35,17 @@ new2048GameIO :: IO Game2048
 new2048GameIO = new2048Game =<< newStdGen
 
 new2048Game :: StdGen -> IO Game2048
-new2048Game gen = runM2048Gen gen (addTileToBoard newEmptyBoard >>= constructEmpty2048)
+new2048Game gen = runM2048Gen gen $ do
+    info $ "Creating new board with StdGen = " ++ show gen
+    addTileToBoard newEmptyBoard >>= constructEmpty2048
 
 constructEmpty2048 :: Board2048 -> M2048 Game2048
 constructEmpty2048 board = do
     gen <- get
     return (Game2048 board gen emptyDC emptyLogRecord False)
+
+update2048Board :: Board2048 -> Game2048 -> Game2048
+update2048Board b g = g { board = b }
 
 fromArrayG :: [[Int]] -> StdGen -> Maybe Game2048
 fromArrayG xs gen = do
@@ -78,6 +88,9 @@ step' Game2048 {..} dir = do
         let newDC = incCountFor dir count
          in return (Game2048 withNewTile gen' newDC logR devel)
 
+gameScore :: Game2048 -> Int
+gameScore Game2048 {..} = score board
+
 gameIsWon :: Board2048 -> Bool
 gameIsWon b = highestTileValue b == winningTileValue
 
@@ -100,3 +113,34 @@ disableDevelopmentMode g = g { devel = False }
 
 toggleDevelopmentMode :: Game2048 -> Game2048
 toggleDevelopmentMode g = g { devel = not (devel g) }
+
+runInDevelopmentMode :: Monad m => (Game2048 -> m Game2048) -> Game2048 -> m Game2048
+runInDevelopmentMode m g = if devel g then m g else return g
+
+reset2048Game :: Game2048 -> IO Game2048
+reset2048Game g = runM2048Gen (gen g) $ do
+    logSeparator
+    info $ "Resetting board to empty state. Score was: " ++ show (gameScore g) 
+    newRandomBoard <- addTileToBoard newEmptyBoard
+    return (update2048Board newRandomBoard g)
+
+devReset2048Game :: Game2048 -> IO Game2048
+devReset2048Game g = runInDevelopmentMode reset2048Game g
+
+newAlmostWinningGame :: Game2048 -> IO Game2048
+newAlmostWinningGame g = runM2048Gen (gen g) $ do
+    info $ "Setting board up for a really close win"
+    let newBoard = fromJust (fromArray newAlmostWinningBoard)
+    return (update2048Board newBoard g)
+
+devNewAlmostWinningGame :: Game2048 -> IO Game2048
+devNewAlmostWinningGame g = runInDevelopmentMode newAlmostWinningGame g
+
+newAlmostLosingGame :: Game2048 -> IO Game2048
+newAlmostLosingGame g = runM2048Gen (gen g) $ do
+    info $ "Setting board up for a really ugly loss"
+    let newBoard = fromJust (fromArray newAlmostLostBoard)
+    return (update2048Board newBoard g)
+
+devNewAlmostLosingGame :: Game2048 -> IO Game2048
+devNewAlmostLosingGame g = runInDevelopmentMode newAlmostLosingGame g
