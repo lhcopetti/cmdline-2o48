@@ -36,7 +36,6 @@ data Game2048 = Game2048
 data GameEnded  = YouWon Game2048
                 | YouLose Game2048
 
-
 type LogRecord = [String]
 
 type M2048 = ReaderT UTCTime (WriterT LogRecord (State StdGen))

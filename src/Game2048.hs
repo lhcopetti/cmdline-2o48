@@ -2,6 +2,7 @@
 module Game2048
     ( new2048GameIO 
     , new2048Game
+    , constructEmpty2048
     , devReset2048Game
     , gameScore
     , fromArrayG

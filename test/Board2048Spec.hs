@@ -5,9 +5,12 @@ import Game2048
 import Control.Monad
 import Control.Monad.IO.Class
 import Control.Monad.State
+import Data.Either (fromRight)
+import Data.Maybe (fromJust)
 import Directions
 import System.Random
 import Test.Hspec
+import Types2048
 
 main :: IO ()
 main = hspec spec
@@ -34,9 +37,8 @@ testViewBoard = describe "test view board" $
 testNewRandomBoard :: Spec
 testNewRandomBoard = describe "test new random board" $ do
     it "all new random boards should have a score equal to 2" $ do
-        let stdGen = mkStdGen 42
-            randomBoards = evalState (replicateM 500 newRandomBoard) stdGen
-        all ((== 2) . score) randomBoards `shouldBe` True
+        randomBoards <- replicateM 500 (board <$> new2048GameIO)
+        all ((\x -> (x == 2) || (x == 4)) . score) randomBoards `shouldBe` True
 
 
 testNewFromArray :: Spec
@@ -168,7 +170,8 @@ testStepping = describe "test stepping" $ do
                   , [0, 4, 0, 0]
                   , [0, 0, 0, 0]]
             gen = mkStdGen 42
-        board <$> (step <$> (fromArrayG arr1 gen) <*> pure DUp) `shouldBe` fromArray res1
+        stepped <- step (fromJust $ fromArrayG arr1 gen) DUp
+        fromRight newEmptyBoard (board <$> stepped) `shouldBe` fromJust (fromArray res1)
     
     it "stepping the elements and adding a new tile on the same row should not be a problem" $ do
         let arr = [[0, 0, 0, 0]
@@ -180,7 +183,8 @@ testStepping = describe "test stepping" $ do
                   ,[0, 0, 0, 4]
                   ,[0, 0, 0, 8]]
             gen = mkStdGen 40
-        board <$> (step <$> (fromArrayG arr gen) <*> pure DRight) `shouldBe` fromArray res
+        stepped <- step (fromJust $ fromArrayG arr gen) DRight
+        fromRight newEmptyBoard (board <$> stepped) `shouldBe` fromJust (fromArray res)
 
     it "stepping the elements and adding a new tile on the same column should not be a problem" $ do
         let arr = [[0, 0, 0, 0]
@@ -193,7 +197,8 @@ testStepping = describe "test stepping" $ do
                   ,[0, 0, 0, 0]
                   ,[0, 2, 0, 4]]
             gen = mkStdGen 42
-        board <$> (step <$> (fromArrayG arr gen) <*> pure DDown) `shouldBe` fromArray res
+        stepped <- step (fromJust $ fromArrayG arr gen) DDown
+        fromRight newEmptyBoard (board <$> stepped) `shouldBe` fromJust (fromArray res)
 
 
 testAddTileToBoard :: Spec
@@ -207,16 +212,20 @@ testAddTileToBoard = describe "test add tile to the board" $ do
                   ,[0, 0, 0, 0]
                   ,[0, 0, 0, 0]
                   ,[0, 0, 4, 8]]
-            gen = pure (mkStdGen 42)
-        evalState <$> (addTileToBoard <$> fromArray arr) <*> gen `shouldBe` fromArray res
+            gen = mkStdGen 42
+        newBoard <- runM2048Gen gen $ constructEmpty2048 =<< addTileToBoard (fromJust (fromArray arr))
+        board newBoard `shouldBe` (fromJust (fromArray res))
+        --evalState <$> (addTileToBoard <$> fromArray arr) <*> gen `shouldBe` fromArray res
 
     it "adding tile to a full board should be a noop" $ do
         let arr = [[2, 4, 2, 4]
                   ,[2, 4, 2, 4]
                   ,[2, 4, 2, 4]
                   ,[2, 4, 2, 4]]
-            gen = pure (mkStdGen 42)
-        evalState <$> (addTileToBoard <$> fromArray arr) <*> gen `shouldBe` fromArray arr
+            gen = mkStdGen 42
+        newGame <- runM2048Gen gen $ constructEmpty2048 =<< addTileToBoard (fromJust (fromArray arr))
+        board newGame `shouldBe` fromJust (fromArray arr)
+        --evalState <$> (addTileToBoard <$> fromArray arr) <*> gen `shouldBe` fromArray arr
 
 
 testCollapse :: Spec
