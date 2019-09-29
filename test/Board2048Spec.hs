@@ -49,9 +49,18 @@ testNewFromArray = describe "test from array" $ do
     it "should return a board from the constructed array" $ do
         let arr = [ [2, 2, 2, 2], [2, 2, 2, 2], [2, 2, 2, 2], [2, 2, 2, 2] ]
         view <$> (fromArray arr) `shouldBe` (Just arr)
-    it "should invalidate boards with size different than 4" $ do
+    it "should invalidate boards with size different than the default" $ do
         let arr = [ [2, 2, 2, 2], [2, 2], [2, 2], [2, 2, 2, 2] ]
         fromArray arr `shouldBe` Nothing
+    it "should invalidate boards that contain values less than zero" $ do
+        let arr = [ [-200, 2, 2, 2], [2, 2, 2, 2], [2, 2, 2, 2], [2, 2, 2, 2] ]
+        fromArray arr `shouldBe` Nothing
+    it "should invalidate boards that contain tailes are not power of 2" $ do
+        let arr = [ [2, 2, 2, 2], [2, 2, 2, 2], [3, 2, 2, 2], [2, 2, 2, 2] ]
+        fromArray arr `shouldBe` Nothing
+        let arr1 = [ [2, 2, 2, 2], [2, 2, 2, 2], [2, 2, 2, 2], [2, 2, 2, 1023] ]
+        fromArray arr1 `shouldBe` Nothing
+        
 
 
 testReduces :: Spec

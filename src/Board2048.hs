@@ -34,6 +34,7 @@ import Control.Monad.Reader
 import Control.Monad.State
 import Control.Monad.Writer
 import Control.Monad (liftM)
+import Data.Fixed (mod')
 import Data.Maybe (fromJust)
 import Data.Time.Clock (UTCTime)
 import LogRecord
@@ -62,9 +63,16 @@ score (Board2048 b) = sum . concat $ b
 fromArray :: [[Int]] -> Maybe Board2048
 fromArray xs = do
     guard (not . null $ xs)
-    guard (all (not . null) xs)
     guard (all ((== defaultSize) . length) xs)
+    guard (all (>=0) . concat $ xs)
+    guard (all powerOf2OrZero . concat $ xs)
     return (Board2048 xs)
+
+powerOf2OrZero :: Int -> Bool
+powerOf2OrZero = (||) <$> powerOf2 <*> (==0)
+
+powerOf2 :: Int -> Bool
+powerOf2 = (== 0) . (`mod'` 1) . logBase (fromIntegral 2) . fromIntegral
 
 newRandomBoard :: M2048 Board2048
 newRandomBoard = do
