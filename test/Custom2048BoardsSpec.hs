@@ -18,8 +18,8 @@ testBoardFromString = describe "test board from string" $ do
     it "should return nothing for empty strings" $ do
         boardFromString "" `shouldBe` Nothing
     it "should return Just board when the board is well formed" $ do
-        let arr = [ [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0] ]
-        view <$> boardFromString "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0" `shouldBe` (Just arr)
+        let arr = [ [2, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0] ]
+        view <$> boardFromString "2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0" `shouldBe` (Just arr)
     it "should fail for consecutive commas in the input" $
         view <$> boardFromString "0,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0" `shouldBe` Nothing
     it "should fail when there are invalid characters in the input" $

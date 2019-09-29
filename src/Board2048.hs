@@ -72,7 +72,9 @@ fromArray xs = do
     guard (not . null $ xs)
     guard (all ((== defaultSize) . length) xs)
     guard (all powerOf2OrZero . concat $ xs)
-    return $ Board2048 xs
+    let board = Board2048 xs
+    guard (score board > 0)
+    return board
 
 fromArrayExtend :: [[Int]] -> Maybe Board2048
 fromArrayExtend = fromArray . extend

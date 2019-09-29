@@ -28,6 +28,8 @@ spec = do
     testMultipleReduces
     testStepping
     testAddTileToBoard
+    testNewFromArrayExtend
+
 
 testViewBoard :: Spec
 testViewBoard = describe "test view board" $
@@ -75,6 +77,9 @@ testNewFromArrayExtend = describe "test from array extend" $ do
         let arr = [ [ 2048 ] ]
             res = [ [2048, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0] ]
         view <$> fromArrayExtend arr `shouldBe` Just res
+    it "empty arrays are not allowed" $ do
+        fromArrayExtend [ [] ] `shouldBe` Nothing
+        fromArrayExtend [] `shouldBe` Nothing
     
         
 
