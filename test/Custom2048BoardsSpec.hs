@@ -27,6 +27,15 @@ testBoardFromString = describe "test board from string" $ do
     it "empty spaces are not relevant in the input" $ do
         let arr = [ [2, 4, 8, 16], [32, 64, 128, 256], [512, 1024, 2048, 1024], [512, 256, 128, 64] ]
         view <$> boardFromString "2,4,8,16, 32,64,128,256, 512,1024,2048,1024, 512,256,128,64" `shouldBe` Just arr
+    it "should fill missing row tiles with zero" $ do
+        let arr = [ [32, 32, 32, 32], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0] ]
+        view <$> boardFromString "32,32,32,32" `shouldBe` Just arr
+    it "should fill missing columns tiles with zero" $ do
+        let arr = [ [8, 8, 8, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0] ]
+        view <$> boardFromString "8, 8, 8" `shouldBe` Just arr
+    it "supplying a single value is also allowed" $ do
+        let arr = [ [1024, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0] ]
+        view <$> boardFromString "1024" `shouldBe` Just arr
 
 
 testAlmostBoards :: Spec

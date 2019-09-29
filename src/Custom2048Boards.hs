@@ -28,7 +28,7 @@ newAlmostLostBoard = fromJust $ fromArray [ [64, 32, 64, 32]
 
 
 boardFromString :: String -> Maybe Board2048
-boardFromString x = chunksOf 4 <$> (mapM toInt . splitOn "," . filterS $ x) >>= fromArray
+boardFromString x = chunksOf 4 <$> (mapM toInt . splitOn "," . filterS $ x) >>= fromArrayExtend
     where
         filterS = filter (/= ' ')
 

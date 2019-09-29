@@ -60,6 +60,22 @@ testNewFromArray = describe "test from array" $ do
         fromArray arr `shouldBe` Nothing
         let arr1 = [ [2, 2, 2, 2], [2, 2, 2, 2], [2, 2, 2, 2], [2, 2, 2, 1023] ]
         fromArray arr1 `shouldBe` Nothing
+
+testNewFromArrayExtend :: Spec
+testNewFromArrayExtend = describe "test from array extend" $ do
+    it "incomplete arrays will be padded with zeros (rows)" $ do
+        let arr = [ [2, 2, 2, 2], [2, 2, 2, 2], [2, 2, 2, 2], [2, 2, 2] ]
+            res = [ [2, 2, 2, 2], [2, 2, 2, 2], [2, 2, 2, 2], [2, 2, 2, 0] ]
+        view <$> fromArrayExtend arr `shouldBe` Just res
+    it "incomplete arrays will be padded with zeros (columns)" $ do
+        let arr = [ [2, 2, 2 ], [2, 2, 2 ], [2, 2, 2 ], [2, 2, 2] ]
+            res = [ [2, 2, 2, 0], [2, 2, 2, 0], [2, 2, 2, 0], [2, 2, 2, 0] ]
+        view <$> fromArrayExtend arr `shouldBe` Just res
+    it "incomplete arrays will be padded with zeros (single value)" $ do
+        let arr = [ [ 2048 ] ]
+            res = [ [2048, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0] ]
+        view <$> fromArrayExtend arr `shouldBe` Just res
+    
         
 
 

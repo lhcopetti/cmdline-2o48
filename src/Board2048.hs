@@ -8,6 +8,7 @@ module Board2048 (
     score,
     freeTiles,
     fromArray,
+    fromArrayExtend,
 
     getRow,
 
@@ -44,6 +45,9 @@ import Types2048
 defaultSize :: Int
 defaultSize = 4
 
+emptyTileValue :: Int
+emptyTileValue = 0
+
 newEmptyBoard :: Board2048
 newEmptyBoard = Board2048 (replicate defaultSize (replicate defaultSize 0))
 
@@ -67,9 +71,20 @@ fromArray :: [[Int]] -> Maybe Board2048
 fromArray xs = do
     guard (not . null $ xs)
     guard (all ((== defaultSize) . length) xs)
-    guard (all (>=0) . concat $ xs)
     guard (all powerOf2OrZero . concat $ xs)
-    return (Board2048 xs)
+    return $ Board2048 xs
+
+fromArrayExtend :: [[Int]] -> Maybe Board2048
+fromArrayExtend = fromArray . extend
+
+extend :: [[Int]] -> [[Int]]
+extend xs = map (extend' emptyTileValue) (extend' newRow xs)
+    where newRow = replicate emptyTileValue defaultSize
+
+extend' :: a -> [a] -> [a]
+extend' v xs
+    | length xs < defaultSize = let missing = defaultSize - length xs in xs ++ (replicate missing v)
+    | otherwise = xs
 
 powerOf2OrZero :: Int -> Bool
 powerOf2OrZero = (||) <$> powerOf2 <*> (==0)
