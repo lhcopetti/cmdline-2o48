@@ -2,7 +2,6 @@
 module Board2048 (
 
     newEmptyBoard,
-    newRandomBoard,
 
     Board2048,
     view,
@@ -73,22 +72,6 @@ powerOf2OrZero = (||) <$> powerOf2 <*> (==0)
 
 powerOf2 :: Int -> Bool
 powerOf2 = (== 0) . (`mod'` 1) . logBase (fromIntegral 2) . fromIntegral
-
-newRandomBoard :: M2048 Board2048
-newRandomBoard = do
-    count <- stRandomR (0, 15)
-    let left = replicate count 0
-        right = replicate (15 - count) 0
-        arr = left ++ [2] ++ right
-        in
-        return . fromJust . fromArray . chunksOf defaultSize $ arr
-
-chunksOf :: Int -> [Int] -> [[Int]]
-chunksOf _ [] = []
-chunksOf n xs
-    | n <= 0 = error ("Zero or negative n: " ++ show n)
-    | otherwise = (take n xs) : (chunksOf n (drop n xs))
-
 
 stRandomR :: MonadState StdGen m => (Int, Int) -> m Int
 stRandomR (lo, hi) = do

@@ -27,6 +27,7 @@ dependencies:
 - containers
 - time
 - transformers-either
+- split
 
 library:
   source-dirs: src
