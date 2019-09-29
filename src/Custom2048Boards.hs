@@ -12,19 +12,19 @@ import Data.List.Split (splitOn)
 
 import Types2048
 
-newAlmostWinningBoard :: [[Int]]
-newAlmostWinningBoard = [ [1024, 0, 0, 0]
-                        , [0, 0, 0, 0 ]
-                        , [0, 0, 0, 0 ]
-                        , [0, 0, 0, 1024]
-                        ]        
+newAlmostWinningBoard :: Board2048
+newAlmostWinningBoard = fromJust $ fromArray [ [1024, 0, 0, 0]
+                                             , [0, 0, 0, 0 ]
+                                             , [0, 0, 0, 0 ]
+                                             , [0, 0, 0, 1024]
+                                             ]        
 
-newAlmostLostBoard :: [[Int]]
-newAlmostLostBoard = [ [64, 32, 64, 32]
-                     , [32, 64, 8, 8 ]
-                     , [64, 32, 64, 32]
-                     , [32, 64, 32, 64]
-                     ]
+newAlmostLostBoard :: Board2048
+newAlmostLostBoard = fromJust $ fromArray [ [64, 32, 64, 32]
+                                          , [32, 64, 8, 8 ]
+                                          , [64, 32, 64, 32]
+                                          , [32, 64, 32, 64]
+                                          ]
 
 
 boardFromString :: String -> Maybe Board2048

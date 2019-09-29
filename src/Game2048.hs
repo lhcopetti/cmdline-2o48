@@ -147,8 +147,7 @@ devReplace2048BoardFor = runInDevelopmentMode . replace2048BoardFor
 newAlmostWinningGame :: Game2048 -> IO Game2048
 newAlmostWinningGame g = runM2048Gen (gen g) $ do
     info $ "Setting board up for a really close win"
-    let newBoard = fromJust (fromArray newAlmostWinningBoard)
-    return (update2048Board newBoard g)
+    return (update2048Board newAlmostWinningBoard g)
 
 devNewAlmostWinningGame :: Game2048 -> IO Game2048
 devNewAlmostWinningGame g = runInDevelopmentMode newAlmostWinningGame g
@@ -156,8 +155,7 @@ devNewAlmostWinningGame g = runInDevelopmentMode newAlmostWinningGame g
 newAlmostLosingGame :: Game2048 -> IO Game2048
 newAlmostLosingGame g = runM2048Gen (gen g) $ do
     info $ "Setting board up for a really ugly loss"
-    let newBoard = fromJust (fromArray newAlmostLostBoard)
-    return (update2048Board newBoard g)
+    return (update2048Board newAlmostLostBoard g)
 
 devNewAlmostLosingGame :: Game2048 -> IO Game2048
 devNewAlmostLosingGame g = runInDevelopmentMode newAlmostLosingGame g

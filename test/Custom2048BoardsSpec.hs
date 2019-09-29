@@ -2,6 +2,8 @@ module Custom2048BoardsSpec where
 
 import Board2048
 import Custom2048Boards
+import Data.Maybe (fromJust)
+import Game2048 (winningTileValue)
 import Test.Hspec
 
 main :: IO ()
@@ -9,8 +11,7 @@ main = hspec spec
 
 
 spec :: Spec
-spec = do
-    testBoardFromString
+spec = testBoardFromString >> testAlmostBoards
 
 testBoardFromString :: Spec
 testBoardFromString = describe "test board from string" $ do
@@ -26,3 +27,11 @@ testBoardFromString = describe "test board from string" $ do
     it "empty spaces are not relevant in the input" $ do
         let arr = [ [2, 4, 8, 16], [32, 64, 128, 256], [512, 1024, 2048, 1024], [512, 256, 128, 64] ]
         view <$> boardFromString "2,4,8,16, 32,64,128,256, 512,1024,2048,1024, 512,256,128,64" `shouldBe` Just arr
+
+
+testAlmostBoards :: Spec
+testAlmostBoards = describe "test almost boards" $ do
+    it "should return a board that is almost winning" $ do
+        score newAlmostWinningBoard `shouldSatisfy` (>=winningTileValue)
+    it "should return a board that is almost losing" $ do
+        freeTiles newAlmostLostBoard `shouldBe` 0

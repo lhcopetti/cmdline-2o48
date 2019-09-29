@@ -6,6 +6,7 @@ module Board2048 (
     Board2048,
     view,
     score,
+    freeTiles,
     fromArray,
 
     getRow,
@@ -57,6 +58,9 @@ view (Board2048 b) = b
 
 score :: Board2048 -> Int
 score (Board2048 b) = sum . concat $ b
+
+freeTiles :: Board2048 -> Int
+freeTiles (Board2048 b) = length . filter (==0) . concat $ b
 
 
 fromArray :: [[Int]] -> Maybe Board2048
