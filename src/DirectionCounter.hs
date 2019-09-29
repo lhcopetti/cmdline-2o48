@@ -10,7 +10,7 @@ import qualified Data.Map as M
 import           Data.Map (Map)
 import           Directions
 
-data DirectionCounter = DC (Map Direction Int)
+newtype DirectionCounter = DC (Map Direction Int)
 
 emptyDC :: DirectionCounter
 emptyDC = DC M.empty

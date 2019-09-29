@@ -65,7 +65,7 @@ step' Game2048 {..} dir = do
         boardChanged = stepped /= board
 
     if not boardChanged then do
-        debug $ "Board did not change, ignoring input"
+        debug "Board did not change, ignoring input"
         return (Game2048 board gen count logR devel)
     else do
 
@@ -76,7 +76,7 @@ step' Game2048 {..} dir = do
         withNewTile <- addTileToBoard stepped
 
         when (gameIsLost withNewTile) $ do
-            info $ "I am sorry to inform you that you have just lost the game"
+            info "I am sorry to inform you that you have just lost the game"
             left (YouLose (Game2048 withNewTile gen count logR devel))
 
         let emptySlots = emptySlotsCount withNewTile
@@ -127,7 +127,7 @@ reset2048Game g = runM2048Gen (gen g) $ do
     return (update2048Board newRandomBoard g)
 
 devReset2048Game :: Game2048 -> IO Game2048
-devReset2048Game g = runInDevelopmentMode reset2048Game g
+devReset2048Game = runInDevelopmentMode reset2048Game
 
 replace2048BoardFor :: String -> Game2048 -> IO Game2048
 replace2048BoardFor input g = runM2048Gen (gen g) $ do
@@ -146,16 +146,16 @@ devReplace2048BoardFor = runInDevelopmentMode . replace2048BoardFor
 
 newAlmostWinningGame :: Game2048 -> IO Game2048
 newAlmostWinningGame g = runM2048Gen (gen g) $ do
-    info $ "Setting board up for a really close win"
+    info "Setting board up for a really close win"
     return (update2048Board newAlmostWinningBoard g)
 
 devNewAlmostWinningGame :: Game2048 -> IO Game2048
-devNewAlmostWinningGame g = runInDevelopmentMode newAlmostWinningGame g
+devNewAlmostWinningGame = runInDevelopmentMode newAlmostWinningGame
 
 newAlmostLosingGame :: Game2048 -> IO Game2048
 newAlmostLosingGame g = runM2048Gen (gen g) $ do
-    info $ "Setting board up for a really ugly loss"
+    info "Setting board up for a really ugly loss"
     return (update2048Board newAlmostLostBoard g)
 
 devNewAlmostLosingGame :: Game2048 -> IO Game2048
-devNewAlmostLosingGame g = runInDevelopmentMode newAlmostLosingGame g
+devNewAlmostLosingGame = runInDevelopmentMode newAlmostLosingGame

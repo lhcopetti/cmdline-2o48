@@ -29,8 +29,8 @@ main = do
 loop :: Game2048 -> IO (Maybe GameEnded)
 loop game = do
     render game
-    ch <- hGetChar stdin
-    if (ch /= '\ESC') then do
+    ch <- getChar
+    if ch /= '\ESC' then do
         updated <- update game ch
         case updated of
             Right g -> loop g
@@ -45,11 +45,11 @@ update g 'w' = step g DUp
 update g 'a' = step g DLeft
 update g 's' = step g DDown
 update g 'd' = step g DRight
-update g 'q' = liftM Right (devNewAlmostWinningGame g)
-update g 'e' = liftM Right (devNewAlmostLosingGame g)
+update g 'q' = Right <$> devNewAlmostWinningGame g
+update g 'e' = Right <$> devNewAlmostLosingGame g
 update g 'x' = return . Right . toggleDevelopmentMode $ g
-update g ' ' = liftM Right (devReset2048Game g)
-update g 'c' = getLine >>= \newBoard -> liftM Right $ devReplace2048BoardFor newBoard g
+update g ' ' = Right <$> devReset2048Game g
+update g 'c' = getLine >>= \newBoard -> Right <$> devReplace2048BoardFor newBoard g
 update g _ = return (Right g)
 
 handleGameEnded :: GameEnded -> IO ()

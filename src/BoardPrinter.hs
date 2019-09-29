@@ -72,7 +72,7 @@ logBodyLength = 10
 
 mkLogBody :: [String] -> [String]
 mkLogBody xs
-    | length xs < logBodyLength = xs ++ (replicate (logBodyLength - length xs) "")
+    | length xs < logBodyLength = xs ++ replicate (logBodyLength - length xs) ""
     | otherwise = reverse . take logBodyLength . reverse $ xs
 
 
@@ -81,7 +81,7 @@ printSpaceBetweenBoardAndLog = "   #   "
 
 
 printRow :: [Int] -> [String]
-printRow xs = ["|" ++ printTopRow xs ++ "|"] ++
+printRow xs = ("|" ++ printTopRow xs ++ "|") :
               ["|" ++ printBottomRow xs ++ "|"]
     where
         printTopRow    = intercalate "|" . map (formatS . topValue)

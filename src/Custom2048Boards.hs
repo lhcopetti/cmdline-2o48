@@ -45,6 +45,6 @@ chunksOf :: Int -> [Int] -> [[Int]]
 chunksOf _ [] = []
 chunksOf n xs
     | n <= 0 = error ("Zero or negative n: " ++ show n)
-    | otherwise = (take n xs) : (chunksOf n (drop n xs))
+    | otherwise = take n xs : chunksOf n (drop n xs)
 
 

@@ -9,8 +9,7 @@ main = hspec spec
 
 
 spec :: Spec
-spec = do
-    testBottomValue
+spec = testBottomValue
 
 testBottomValue :: Spec
 testBottomValue = describe "test value separation" $ do

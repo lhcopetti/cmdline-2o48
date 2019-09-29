@@ -40,7 +40,7 @@ mkLogMessage lvl msg = do
     return (lvl ++ "|" ++ time ++ "|" ++ msg)
 
 formatTimestamp :: (MonadReader UTCTime m, MonadWriter LogRecord m) => m String
-formatTimestamp = liftM (formatTime defaultTimeLocale "%T") ask
+formatTimestamp = formatTime defaultTimeLocale "%T" <$> ask
 
 logSeparator :: (MonadReader UTCTime m, MonadWriter LogRecord m) => m ()
 logSeparator = output ""

@@ -1,4 +1,3 @@
-{-# LANGUAGE RecordWildCards #-}
 module Types2048
     ( M2048
     , EM2048
@@ -22,7 +21,7 @@ import Data.Time.Clock (UTCTime, getCurrentTime)
 import DirectionCounter
 import System.Random
 
-data Board2048 = Board2048 [[Int]]
+newtype Board2048 = Board2048 [[Int]]
     deriving (Show, Eq)
 
 data Game2048 = Game2048 

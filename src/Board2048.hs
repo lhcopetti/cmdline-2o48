@@ -34,7 +34,6 @@ module Board2048 (
 import Control.Monad.Reader
 import Control.Monad.State
 import Control.Monad.Writer
-import Control.Monad (liftM)
 import Data.Fixed (mod')
 import Data.Maybe (fromJust)
 import Data.Time.Clock (UTCTime)
@@ -85,14 +84,14 @@ extend xs = map (extend' emptyTileValue) (extend' newRow xs)
 
 extend' :: a -> [a] -> [a]
 extend' v xs
-    | length xs < defaultSize = let missing = defaultSize - length xs in xs ++ (replicate missing v)
+    | length xs < defaultSize = let missing = defaultSize - length xs in xs ++ replicate missing v
     | otherwise = xs
 
 powerOf2OrZero :: Int -> Bool
 powerOf2OrZero = (||) <$> powerOf2 <*> (==0)
 
 powerOf2 :: Int -> Bool
-powerOf2 = (== 0) . (`mod'` 1) . logBase (fromIntegral 2) . fromIntegral
+powerOf2 = (== 0) . (`mod'` 1) . logBase 2 . fromIntegral
 
 stRandomR :: MonadState StdGen m => (Int, Int) -> m Int
 stRandomR (lo, hi) = do
@@ -137,7 +136,7 @@ addTileToBoard (Board2048 b) = do
         warn "the grid is full, no slot available to fill"
         return (Board2048 b)
     else do
-        randomCoord <- makeCoord <$> (getRandomFromPool onlyZeros)
+        randomCoord <- makeCoord <$> getRandomFromPool onlyZeros
         newRandomTile <- getNewRandomTile
         debug $ "Filling coord: " ++ show randomCoord ++ " with value " ++ show newRandomTile
         let newB = replaceAt b randomCoord newRandomTile
@@ -154,7 +153,7 @@ getRandomFromPool xs = do
 
 
 getNewRandomTile :: MonadState StdGen m => m Int
-getNewRandomTile = liftM (*2) (stRandomR (1, 2))
+getNewRandomTile = (*2) <$> stRandomR (1, 2)
 
 replaceValue :: [Int] -> Coord -> Int -> [Int]
 replaceValue xs x n = take x xs ++ [n] ++ rest
@@ -172,7 +171,7 @@ reduce :: [Int] -> [Int]
 reduce xs = let oldSize = length xs
                 newXs = collapse xs
                 newSize = length newXs
-            in  newXs ++ (replicate (oldSize - newSize) 0)
+            in  newXs ++ replicate (oldSize - newSize) 0
 
 collapse :: [Int] -> [Int]
 collapse = collapse' . filter (/= 0) 
