@@ -3,7 +3,7 @@ module Game2048
     ( new2048GameIO 
     , new2048Game
     , constructEmpty2048
-    , devReset2048Game
+    , reset2048Game
     , gameScore
     , fromArrayG
     , step
@@ -125,9 +125,6 @@ reset2048Game g = runM2048Gen (gen g) $ do
     info $ "Resetting board to empty state. Score was: " ++ show (gameScore g) 
     newRandomBoard <- addTileToBoard newEmptyBoard
     return (update2048Board newRandomBoard g)
-
-devReset2048Game :: Game2048 -> IO Game2048
-devReset2048Game = runInDevelopmentMode reset2048Game
 
 replace2048BoardFor :: String -> Game2048 -> IO Game2048
 replace2048BoardFor input g = runM2048Gen (gen g) $ do
