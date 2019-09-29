@@ -47,7 +47,7 @@ constructEmpty2048 board = do
     return (Game2048 board gen emptyDC emptyLogRecord False)
 
 update2048Board :: Board2048 -> Game2048 -> Game2048
-update2048Board b g = g { board = b }
+update2048Board b g = g { board = b, count = emptyDC }
 
 fromArrayG :: [[Int]] -> StdGen -> Maybe Game2048
 fromArrayG xs gen = do
