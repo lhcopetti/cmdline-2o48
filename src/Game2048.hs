@@ -14,6 +14,7 @@ module Game2048
 
     , devNewAlmostWinningGame
     , devNewAlmostLosingGame
+    , devReplace2048BoardFor
     ) where
 
 import Board2048
@@ -127,6 +128,21 @@ reset2048Game g = runM2048Gen (gen g) $ do
 
 devReset2048Game :: Game2048 -> IO Game2048
 devReset2048Game g = runInDevelopmentMode reset2048Game g
+
+replace2048BoardFor :: String -> Game2048 -> IO Game2048
+replace2048BoardFor input g = runM2048Gen (gen g) $ do
+    logSeparator
+    info $ "Replacing board with user-entered custom input. The score was: " ++ show (gameScore g) 
+    case boardFromString input of
+        Nothing -> do
+            warn $ "The input is not a valid board. [" ++ show input ++ "]" 
+            return g
+        Just newBoard -> do
+            info $ "The input is valid. Initial score is: " ++ show (score newBoard) 
+            return (update2048Board newBoard g)
+
+devReplace2048BoardFor :: String -> Game2048 -> IO Game2048
+devReplace2048BoardFor = runInDevelopmentMode . replace2048BoardFor
 
 newAlmostWinningGame :: Game2048 -> IO Game2048
 newAlmostWinningGame g = runM2048Gen (gen g) $ do

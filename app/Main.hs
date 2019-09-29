@@ -49,6 +49,7 @@ update g 'q' = liftM Right (devNewAlmostWinningGame g)
 update g 'e' = liftM Right (devNewAlmostLosingGame g)
 update g 'x' = return . Right . toggleDevelopmentMode $ g
 update g ' ' = liftM Right (devReset2048Game g)
+update g 'c' = getLine >>= \newBoard -> liftM Right $ devReplace2048BoardFor newBoard g
 update g _ = return (Right g)
 
 handleGameEnded :: GameEnded -> IO ()

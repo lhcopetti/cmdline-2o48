@@ -100,7 +100,7 @@ printDevelopmentOptions g = if devel g then printDevelOptions else printDevelHel
     
         printDevelOptions = [ "Press <q> to use a board that is really close to winning"
                             , "Press <e> to use a board that is really close to losing"
-                            , "To use a custom board, press <c> then type 16 comma-separated values"
+                            , "Press <c> to use a custom board, then type 16 comma-separated values"
                             ]
 
 
