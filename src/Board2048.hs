@@ -24,9 +24,6 @@ module Board2048 (
 
     addTileToBoard,
 
-    reduce,
-    collapse,
-
     emptySlotsCount,
     highestTileValue
     ) where
@@ -34,6 +31,7 @@ module Board2048 (
 import Control.Monad.Reader
 import Control.Monad.State
 import Control.Monad.Writer
+import Core2048
 import Data.Fixed (mod')
 import Data.Maybe (fromJust)
 import Data.Time.Clock (UTCTime)
@@ -104,23 +102,16 @@ getRow :: Board2048 -> Int -> [Int]
 getRow (Board2048 b) row = b !! row
 
 reduceLeft :: Board2048 -> Board2048
-reduceLeft (Board2048 b) = Board2048 (map reduce b)
+reduceLeft (Board2048 b) = Board2048 . reduceL $ b
 
 reduceRight :: Board2048 -> Board2048
-reduceRight (Board2048 b) = Board2048 (map (reverse . reduce . reverse) b)
+reduceRight (Board2048 b) = Board2048 . reduceR $ b
 
 reduceUp :: Board2048 -> Board2048
-reduceUp (Board2048 b) = Board2048 . cols . map reduce . cols $ b
+reduceUp (Board2048 b) = Board2048 . reduceU $ b
 
 reduceDown :: Board2048 -> Board2048
-reduceDown (Board2048 b) = Board2048 . cols . map (reverse . reduce . reverse) . cols $ b
-
-rows :: [[Int]] -> [[Int]]
-rows = id
-
-cols :: [[Int]] -> [[Int]]
-cols [] = []
-cols xss = map head xss : cols (filter (not . null) . map tail $ xss)
+reduceDown (Board2048 b) = Board2048 . reduceD $ b
 
 addTileToBoard :: ( MonadState StdGen m
                   , MonadWriter LogRecord m
@@ -166,19 +157,3 @@ replaceAt xss (x, y) n = take x xss ++ [replaceValue row y n] ++ rest
         row = xss !! x
         rest = drop (x+1) xss
 
-
-reduce :: [Int] -> [Int]
-reduce xs = let oldSize = length xs
-                newXs = collapse xs
-                newSize = length newXs
-            in  newXs ++ replicate (oldSize - newSize) 0
-
-collapse :: [Int] -> [Int]
-collapse = collapse' . filter (/= 0) 
-
-collapse' :: [Int] -> [Int]
-collapse' [] = []
-collapse' [x] = [x]
-collapse' (x:x':xs)
-    | x == x' = x + x' : collapse' xs
-    | otherwise = x : collapse' (x':xs)

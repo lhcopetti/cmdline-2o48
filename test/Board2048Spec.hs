@@ -21,11 +21,7 @@ spec = do
     testViewBoard
     testNewFromArray
     testNewRandomBoard
-    testReduce
-    testCollapse
-    testReduces
     testReplaceAt
-    testMultipleReduces
     testStepping
     testAddTileToBoard
     testNewFromArrayExtend
@@ -82,98 +78,6 @@ testNewFromArrayExtend = describe "test from array extend" $ do
         fromArrayExtend [] `shouldBe` Nothing
     
         
-
-
-testReduces :: Spec
-testReduces = describe "test reduces" $ do
-        it "should push all tiles to the left" $ do
-            let arr = [ [0, 0, 0, 2], [0, 0, 0, 2], [0, 0, 0, 2], [0, 0, 0, 2] ]
-                arr' = [ [2, 0, 0, 0], [2, 0, 0, 0], [2, 0, 0, 0], [2, 0, 0, 0] ]
-            reduceLeft <$> fromArray arr `shouldBe` fromArray arr'
-        it "should push all the tiles to the right" $ do
-            let arr = [ [2, 0, 0, 0], [2, 0, 0, 0], [2, 0, 0, 0], [2, 0, 0, 0] ]
-                arr' = [ [0, 0, 0, 2], [0, 0, 0, 2], [0, 0, 0, 2], [0, 0, 0, 2] ]
-            reduceRight <$> fromArray arr `shouldBe` fromArray arr'
-        it "should push all the tiles upwards" $ do
-            let arr = [ [2, 0, 0, 0], [0, 2, 0, 0], [0, 0, 2, 0], [0, 0, 0, 2] ]
-                arr' = [ [2, 2, 2, 2], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0] ]
-            reduceUp <$> fromArray arr `shouldBe` fromArray arr'
-        it "should push all the tiles downwards" $ do
-            let arr = [ [2, 0, 0, 0], [0, 2, 0, 0], [0, 0, 2, 0], [0, 0, 0, 2] ]
-                arr' = [ [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [2, 2, 2, 2] ]
-            reduceDown <$> fromArray arr `shouldBe` fromArray arr'
-
-testMultipleReduces :: Spec
-testMultipleReduces = describe "test multiple reduces" $ do
-    let arr = [ [8, 0, 0, 0]
-              , [0, 0, 0, 0]
-              , [0, 0, 0, 0]
-              , [0, 0, 0, 0]]
-    it "should send the tile in the clockwise direction" $
-        (reduceUp . reduceLeft . reduceDown . reduceRight) <$> fromArray arr `shouldBe` fromArray arr
-
-    it "should sum the two tiles together" $
-        reduceRight <$> fromArray [ [8, 8, 0, 0]
-                                   , [0, 0, 0, 0]
-                                   , [0, 0, 0, 0]
-                                   , [0, 0, 0, 0]] `shouldBe` fromArray [ [0, 0, 0, 16]
-                                                                        , [0, 0, 0, 0]
-                                                                        , [0, 0, 0, 0]
-                                                                        , [0, 0, 0, 0]]
-
-    it "should sum the four tiles together" $
-        (reduceRight . reduceRight) <$> fromArray [ [8, 8, 8, 8]
-                                                   , [0, 0, 0, 0]
-                                                   , [0, 0, 0, 0]
-                                                   , [0, 0, 0, 0]] `shouldBe` fromArray [ [0, 0, 0, 32]
-                                                                                         , [0, 0, 0, 0]
-                                                                                         , [0, 0, 0, 0]
-                                                                                         , [0, 0, 0, 0]]
-    it "should send the tile clockwise direction" $
-        (reduceRight . reduceDown) <$> fromArray [ [8, 0, 0, 0]
-                                                   , [0, 0, 0, 8]
-                                                   , [0, 0, 0, 0]
-                                                   , [0, 0, 0, 0]] `shouldBe` fromArray [ [0, 0, 0, 0]
-                                                                                         , [0, 0, 0, 0]
-                                                                                         , [0, 0, 0, 0]
-                                                                                         , [0, 0, 0, 16]]
-    it "should send the tile clockwise direction" $
-        (reduceRight . reduceDown) <$> fromArray [ [8, 0, 0, 0]
-                                                   , [0, 0, 0, 8]
-                                                   , [0, 0, 0, 0]
-                                                   , [0, 0, 0, 0]] `shouldBe` fromArray [ [0, 0, 0, 0]
-                                                                                         , [0, 0, 0, 0]
-                                                                                         , [0, 0, 0, 0]
-                                                                                         , [0, 0, 0, 16]]
-
-    it "should be able to reduce all tiles to only one in the bottom-right corner" $
-        (reduceDown . reduceDown . reduceRight . reduceRight) <$> fromArray [ [8, 0, 0, 0]
-                                                                             , [0, 0, 0, 8]
-                                                                             , [4, 0, 0, 4]
-                                                                             , [4, 0, 0, 4]] `shouldBe` fromArray [ [0, 0, 0, 0]
-                                                                                                                     , [0, 0, 0, 0]
-                                                                                                                     , [0, 0, 0, 0]
-                                                                                                                     , [0, 0, 0, 32]]
-
-    it "should be able to reduce all tiles to only one in the top-left corner" $
-        (reduceUp . reduceUp . reduceLeft . reduceLeft) <$> fromArray [ [16, 0, 0, 0]
-                                                                       , [0, 0, 0, 16]
-                                                                       , [8, 0, 0, 8]
-                                                                       , [8, 0, 0, 8]] `shouldBe` fromArray [ [64, 0, 0, 0]
-                                                                                                             , [0, 0, 0, 0]
-                                                                                                             , [0, 0, 0, 0]
-                                                                                                             , [0, 0, 0, 0]]
-    let arr2 = [[8, 0, 0, 0]
-              , [0, 0, 0, 8]
-              , [4, 0, 0, 4]
-              , [4, 0, 0, 4]]
-    let res2 = [[32, 0, 0, 0]
-              , [0, 0, 0, 0]
-              , [0, 0, 0, 0]
-              , [0, 0, 0, 0]]
-    it "should send the tile in the clockwise direction" $
-        (reduceUp . reduceLeft . reduceDown . reduceDown . reduceRight) <$> fromArray arr2 `shouldBe` fromArray res2
-
 
 testReplaceAt :: Spec
 testReplaceAt = describe "test replaceAt" $ do
@@ -256,31 +160,3 @@ testAddTileToBoard = describe "test add tile to the board" $ do
         newGame <- runM2048Gen gen $ constructEmpty2048 =<< addTileToBoard (fromJust (fromArray arr))
         board newGame `shouldBe` fromJust (fromArray arr)
         --evalState <$> (addTileToBoard <$> fromArray arr) <*> gen `shouldBe` fromArray arr
-
-
-testCollapse :: Spec
-testCollapse = describe "test collapse" $ do
-    it "should return the empty list" $
-        collapse [] `shouldBe` []
-    it "should return the same element" $
-        collapse [2] `shouldBe` [2]
-    it "should not collapse the elements if they are different" $
-        collapse [2, 4] `shouldBe` [2, 4]
-    it "should collapse elements when they are equal" $
-        collapse [2, 2] `shouldBe` [4]
-    it "should collapse elements only once for each pass" $ do
-        collapse [2, 2, 2, 2] `shouldBe` [4, 4]
-        collapse [4, 2, 2] `shouldBe` [4, 4]
-
-    it "empty leading spaces (equal to zero) should be removed" $
-        collapse [0, 0, 2, 2] `shouldBe` [4]
-    it "empty trailling spaces (equal to zero) should be removed" $
-        collapse [2, 2, 0, 0] `shouldBe` [4]
-
-testReduce :: Spec
-testReduce = describe "test reduce" $ do
-    it "should not change the array size" $
-        reduce [0, 0, 0, 0, 0, 0] `shouldBe` [0, 0, 0, 0, 0, 0]
-    it "when collapsing elements, should restore the array size" $ do
-        reduce [2, 2, 2, 2] `shouldBe` [4, 4, 0, 0]
-        reduce [0, 0, 2, 2] `shouldBe` [4, 0, 0, 0]
