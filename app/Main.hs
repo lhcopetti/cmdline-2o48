@@ -1,8 +1,10 @@
+{-# LANGUAGE RecordWildCards #-}
 module Main where
 
-import Control.Monad (when)
+import Arrays
 import Control.Monad.State
 import Control.Monad.Writer
+import Data.Bifunctor (bimap)
 import Data.Char
 import System.IO
 import System.Process
@@ -14,17 +16,8 @@ import Game2048
 import Types2048
 import Custom2048Boards
 
+import Control.Concurrent (threadDelay)
 
-main :: IO ()
-main = do
-    hSetBuffering stdin NoBuffering
-    hSetBuffering stdout NoBuffering
-    game <- loop =<< new2048GameIO
-    case game of
-        Nothing -> putStrLn "You have quit the game. Please, come back soon!"
-        Just gEnded -> handleGameEnded gEnded
-    newLine
-    putStrLn "The end! I hope you are happy."
 
 loop :: Game2048 -> IO (Maybe GameEnded)
 loop game = do
@@ -61,3 +54,15 @@ clearScreen = callCommand "clear"
 
 newLine :: IO ()
 newLine = putStrLn ""
+
+
+main :: IO ()
+main = do
+    hSetBuffering stdin NoBuffering
+    hSetBuffering stdout NoBuffering
+    game <- loop =<< new2048GameIO
+    case game of
+        Nothing -> putStrLn "You have quit the game. Please, come back soon!"
+        Just gEnded -> handleGameEnded gEnded
+    newLine
+    putStrLn "The end! I hope you are happy."
